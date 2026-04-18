@@ -51,7 +51,12 @@ export function useFoodScan(apiBaseUrl: string = process.env.NEXT_PUBLIC_API_URL
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        throw new Error(`API Error: ${response.statusText}`);
+        let errorDetail = response.statusText;
+        try {
+            const errorData = await response.json();
+            errorDetail = errorData.detail || errorDetail;
+        } catch (e) {}
+        throw new Error(`Error del Cerebro: ${errorDetail}`);
       }
 
       const data: ScanResponse = await response.json();

@@ -18,7 +18,7 @@ export default function PrimeStateApp() {
         console.log("%c[PRIME-DEBUG] API Base URL:", "color: #00d1b2; font-weight: bold;", API_BASE);
     }, [API_BASE]);
 
-  const { scanFood, isProcessing, lastAnalysis, reset } = useFoodScan(API_BASE);
+  const { scanFood, isProcessing, lastAnalysis, reset, error: scanError } = useFoodScan(API_BASE);
   
   const [showDopamineRoom, setShowDopamineRoom] = useState(false);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
@@ -139,6 +139,17 @@ export default function PrimeStateApp() {
           <Settings size={20} />
         </button>
       </header>
+
+      {/* Global Error Display */}
+      {scanError && (
+        <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-4 rounded-2xl bg-brand-red/10 border border-brand-red/20 text-brand-red text-center"
+        >
+            <p className="text-[10px] font-black uppercase tracking-widest">{scanError}</p>
+        </motion.div>
+      )}
 
       {/* Main Experience */}
       <section className="flex-1 flex flex-col justify-center">
