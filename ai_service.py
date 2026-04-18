@@ -53,7 +53,7 @@ Debes responder ESTRICTAMENTE con un JSON válido:
 class VisionInferenceService:
     def __init__(self):
         # Using the new SDK client pattern
-        self.model_id = "gemini-1.5-flash"
+        self.model_id = "gemini-2.0-flash"
 
     async def analyze_food_image(self, image_bytes: bytes, mime_type: str = "image/jpeg") -> FoodAnalysisResult:
         """
