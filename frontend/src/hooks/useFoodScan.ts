@@ -19,6 +19,7 @@ export type ScanResponse = {
   calories_remaining: number;
   message: string;
   asset_url?: string;
+  entry_id?: string;
 };
 
 export function useFoodScan(apiBaseUrl: string = process.env.NEXT_PUBLIC_API_URL || "https://prime-state-api.loca.lt") {
