@@ -27,30 +27,43 @@ REGLAS:
 
 class SearchService:
     def __init__(self):
-        self.model_id = "gemini-1.5-flash"
+        # Trying a more specific version to avoid 404s
+        self.model_ids = ["gemini-1.5-flash-002", "gemini-2.0-flash", "gemini-1.5-flash"]
 
     async def search_food(self, query: str) -> ManualSearchResponse:
-        try:
-            response = await client.aio.models.generate_content(
-                model=self.model_id,
-                contents=f"Busca la información nutricional de: {query}",
-                config=types.GenerateContentConfig(
-                    system_instruction=SEARCH_PROMPT,
-                    response_mime_type="application/json",
-                    response_schema=ManualSearchResponse,
+        last_err = None
+        for model_id in self.model_ids:
+            try:
+                response = await client.aio.models.generate_content(
+                    model=model_id,
+                    contents=f"Busca la información nutricional de: {query}",
+                    config=types.GenerateContentConfig(
+                        system_instruction=SEARCH_PROMPT,
+                        response_mime_type="application/json",
+                        response_schema=ManualSearchResponse,
+                    )
                 )
-            )
 
-            if not response.text:
-                raise ValueError("Gemini returned empty response.")
+                if not response.text:
+                    continue
 
-            data = json.loads(response.text)
-            return ManualSearchResponse(**data)
+                data = json.loads(response.text)
+                return ManualSearchResponse(**data)
 
-        except Exception as e:
-            err_msg = str(e)
-            if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg:
-                print("Gemini Search Quota Exceeded (429)")
-                raise HTTPException(status_code=429, detail="Buscador saturado. Por favor, intenta de nuevo en un minuto.")
-            print(f"SearchService Error: {err_msg}")
-            raise e
+            except Exception as e:
+                last_err = e
+                err_msg = str(e)
+                if "404" in err_msg:
+                    print(f"Model {model_id} not found, trying next...")
+                    continue
+                if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg:
+                    print(f"Model {model_id} quota hit, trying next...")
+                    continue
+                break # Other errors shouldn't be retried with different models
+        
+        # If we get here, all models failed
+        err_msg = str(last_err)
+        if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg:
+            raise HTTPException(status_code=429, detail="Todos los cerebros de búsqueda están saturados. Intenta en un minuto.")
+        
+        raise HTTPException(status_code=500, detail=f"Error en el buscador: {err_msg}")

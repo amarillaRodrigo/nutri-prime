@@ -34,38 +34,50 @@ REGLAS:
 
 class AdvisorService:
     def __init__(self):
-        self.model_id = "gemini-1.5-flash"
+        # Fallback list for higher resilience
+        self.model_ids = ["gemini-1.5-flash-002", "gemini-2.0-flash", "gemini-1.5-flash"]
 
     async def get_recommendations(self, request: AdvisorRequest) -> AdvisorResponse:
-        try:
-            prompt = ADVISOR_PROMPT.format(
-                calories_left=request.calories_left,
-                protein_left=request.protein_left,
-                carbs_left=request.carbs_left,
-                fat_left=request.fat_left,
-                available_food=request.available_food
-            )
+        last_err = None
+        prompt = ADVISOR_PROMPT.format(
+            calories_left=request.calories_left,
+            protein_left=request.protein_left,
+            carbs_left=request.carbs_left,
+            fat_left=request.fat_left,
+            available_food=request.available_food
+        )
 
-            response = await client.aio.models.generate_content(
-                model=self.model_id,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    system_instruction="Actúa como el Prime State Advisor.",
-                    response_mime_type="application/json",
-                    response_schema=AdvisorResponse,
+        for model_id in self.model_ids:
+            try:
+                response = await client.aio.models.generate_content(
+                    model=model_id,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        system_instruction="Actúa como el Prime State Advisor.",
+                        response_mime_type="application/json",
+                        response_schema=AdvisorResponse,
+                    )
                 )
-            )
 
-            if not response.text:
-                raise ValueError("Gemini returned empty response.")
+                if not response.text:
+                    continue
 
-            data = json.loads(response.text)
-            return AdvisorResponse(**data)
+                data = json.loads(response.text)
+                return AdvisorResponse(**data)
 
-        except Exception as e:
-            err_msg = str(e)
-            if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg:
-                print("Gemini Advisor Quota Exceeded (429)")
-                raise HTTPException(status_code=429, detail="El asesor está descansando (Cuota excedida). Intenta de nuevo en unos momentos.")
-            print(f"AdvisorService Error: {err_msg}")
-            raise e
+            except Exception as e:
+                last_err = e
+                err_msg = str(e)
+                if "404" in err_msg:
+                    print(f"Advisor Model {model_id} not found, trying next...")
+                    continue
+                if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg:
+                    print(f"Advisor Model {model_id} quota hit, trying next...")
+                    continue
+                break
+        
+        # Final Error handling
+        err_msg = str(last_err)
+        if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg:
+            raise HTTPException(status_code=429, detail="El asesor está saturado por hoy. Intenta en unos momentos.")
+        raise HTTPException(status_code=500, detail=f"Error en el asesor: {err_msg}")

@@ -47,39 +47,45 @@ REGLAS DE INFERENCIA (Chain-of-Thought):
 
 class VisionInferenceService:
     def __init__(self):
-        # Using the stable 1.5 Flash for free tier reliability
-        self.model_id = "gemini-1.5-flash"
+        # Fallback list for higher resilience
+        self.model_ids = ["gemini-1.5-flash-002", "gemini-2.0-flash", "gemini-1.5-flash"]
 
     async def analyze_food_image(self, image_bytes: bytes, mime_type: str = "image/jpeg") -> FoodAnalysisResult:
-        """
-        Sends raw image bytes to Gemini using the modern google-genai SDK (Async).
-        """
-        try:
-            response = await client.aio.models.generate_content(
-                model=self.model_id,
-                contents=[
-                    types.Part.from_bytes(data=image_bytes, mime_type=mime_type),
-                    "Realiza el análisis nutricional detallado de este plato."
-                ],
-                config=types.GenerateContentConfig(
-                    system_instruction=SYSTEM_PROMPT,
-                    response_mime_type="application/json",
-                    response_schema=FoodAnalysisResult,
+        last_err = None
+        for model_id in self.model_ids:
+            try:
+                response = await client.aio.models.generate_content(
+                    model=model_id,
+                    contents=[
+                        types.Part.from_bytes(data=image_bytes, mime_type=mime_type),
+                        "Realiza el análisis nutricional detallado de este plato."
+                    ],
+                    config=types.GenerateContentConfig(
+                        system_instruction=SYSTEM_PROMPT,
+                        response_mime_type="application/json",
+                        response_schema=FoodAnalysisResult,
+                    )
                 )
-            )
-            
-            if not response.text:
-                raise ValueError("Gemini returned empty response.")
                 
-            analysis_dict = json.loads(response.text)
-            
-            # Pydantic validation (Zero Trust)
-            return FoodAnalysisResult(**analysis_dict)
-            
-        except Exception as e:
-            err_msg = str(e)
-            if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg:
-                print("Gemini Quota Exceeded (429)")
-                raise HTTPException(status_code=429, detail="El cerebro de la IA está saturado por hoy (Cuota excedida). Intenta de nuevo en unos segundos.")
-            print(f"VisionInferenceService Error: {err_msg}")
-            raise e
+                if not response.text:
+                    continue
+                    
+                analysis_dict = json.loads(response.text)
+                return FoodAnalysisResult(**analysis_dict)
+                
+            except Exception as e:
+                last_err = e
+                err_msg = str(e)
+                if "404" in err_msg:
+                    print(f"Vision Model {model_id} not found, trying next...")
+                    continue
+                if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg:
+                    print(f"Vision Model {model_id} quota hit, trying next...")
+                    continue
+                break
+        
+        # Final Error handling
+        err_msg = str(last_err)
+        if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg:
+            raise HTTPException(status_code=429, detail="El cerebro visual está saturado por hoy. Intenta en unos minutos.")
+        raise HTTPException(status_code=500, detail=f"Error en el análisis visual: {err_msg}")
