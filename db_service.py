@@ -50,6 +50,11 @@ class DBService:
         return DBService._db.table("food_entries").insert(entry_data).execute()
 
     @staticmethod
+    async def delete_food_entry(entry_id: str, user_id: str):
+        if not DBService._db: return None
+        return DBService._db.table("food_entries").delete().eq("id", entry_id).eq("user_id", user_id).execute()
+
+    @staticmethod
     async def get_daily_log(user_id: str, date_str: str):
         if not DBService._db: return None
         response = DBService._db.table("daily_logs").select("*").eq("user_id", user_id).eq("date", date_str).execute()

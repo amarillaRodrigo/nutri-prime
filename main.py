@@ -130,7 +130,10 @@ async def upload_image(
             "veredicto": analysis.veredicto,
             "justificacion": analysis.justificacion
         }
-        await DBService.create_food_entry(entry_payload)
+        db_response = await DBService.create_food_entry(entry_payload)
+        entry_id = None
+        if db_response and getattr(db_response, 'data', None):
+            entry_id = db_response.data[0].get("id")
         
         # 4. Update Daily Log
         today = date.today().isoformat()
@@ -159,6 +162,7 @@ async def upload_image(
             motivation_mode_active=trigger_intervention,
             calories_remaining=calories_remaining,
             message=analysis.justificacion or intervention_data["message"] or "Registro guardado.",
+            entry_id=entry_id
         )
 
     except Exception as e:
@@ -207,6 +211,17 @@ async def get_history(
             "history": history,
             "today_totals": today_totals
         }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/history/{entry_id}")
+async def delete_history_entry(
+    entry_id: str,
+    user_id: str = Depends(get_current_user)
+):
+    try:
+        await DBService.delete_food_entry(entry_id, user_id)
+        return {"message": "Entry deleted"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

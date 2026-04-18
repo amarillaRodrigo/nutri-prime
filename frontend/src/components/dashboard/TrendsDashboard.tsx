@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Zap, Flame, Trophy, TrendingUp, Wheat, Droplet } from "lucide-react";
+import { Zap, Flame, Trophy, TrendingUp, Wheat, Droplet, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MetricCardProps {
@@ -53,9 +53,10 @@ interface TrendsDashboardProps {
   };
   trendImageUrl?: string;
   history?: HistoryEntry[];
+  onDelete?: (id: string) => void;
 }
 
-export default function TrendsDashboard({ metrics, trendImageUrl, history = [] }: TrendsDashboardProps) {
+export default function TrendsDashboard({ metrics, trendImageUrl, history = [], onDelete }: TrendsDashboardProps) {
   return (
     <div className="w-full space-y-8 pb-12">
       {/* Metrics Row */}
@@ -168,10 +169,18 @@ export default function TrendsDashboard({ metrics, trendImageUrl, history = [] }
                             <span className="text-[10px] font-bold text-zinc-600">{entry.calories} kcal</span>
                         </div>
                     </div>
-                    {entry.veredicto === 'BUENO' ? 
-                        <div className="w-8 h-8 rounded-full bg-brand-teal/10 flex items-center justify-center text-brand-teal italic font-black">🔥</div> :
-                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-zinc-700 font-black">?</div>
-                    }
+                    
+                    <div className="flex items-center gap-2">
+                        {onDelete && (
+                            <button onClick={() => onDelete(entry.id)} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-zinc-500 hover:text-red-500 hover:bg-red-500/10 transition-colors">
+                                <Trash2 size={14} />
+                            </button>
+                        )}
+                        {entry.veredicto === 'BUENO' ? 
+                            <div className="w-8 h-8 rounded-full bg-brand-teal/10 flex items-center justify-center text-brand-teal italic font-black">🔥</div> :
+                            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-zinc-700 font-black">?</div>
+                        }
+                    </div>
                 </div>
             )) : (
                 <div className="p-8 border border-dashed border-white/5 rounded-3xl text-center">

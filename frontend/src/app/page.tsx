@@ -157,6 +157,18 @@ export default function PrimeStateApp() {
     }
   };
 
+  const handleDeleteEntry = async (entryId: string) => {
+    try {
+      await fetch(`${API_BASE}/history/${entryId}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${TEST_TOKEN}` }
+      });
+      fetchHistory(); // Refresh the list & recalculate today_totals
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const handleCapture = async (blob: Blob) => {
     // Ensure profile exists on backend before uploading image
     const profileReady = await ensureProfileSynced();
@@ -253,6 +265,7 @@ export default function PrimeStateApp() {
           }}
           trendImageUrl={`${API_BASE}/analytics/trends`} 
           history={scanHistory}
+          onDelete={handleDeleteEntry}
         />
       </section>
 
@@ -270,7 +283,12 @@ export default function PrimeStateApp() {
         isOpen={showDopamineRoom}
         onClose={(proceed) => {
             setShowDopamineRoom(false);
-            if (!proceed) reset();
+            if (!proceed) {
+                reset();
+                if (lastAnalysis?.entry_id) {
+                    handleDeleteEntry(lastAnalysis.entry_id);
+                }
+            }
         }}
         assetUrl={lastAnalysis?.asset_url}
         message={lastAnalysis?.message}

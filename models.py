@@ -47,3 +47,4 @@ class UploadResponse(BaseModel):
     motivation_mode_active: bool
     calories_remaining: float
     message: Optional[str] = None
+    entry_id: Optional[str] = None
