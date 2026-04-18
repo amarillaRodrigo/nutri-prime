@@ -136,7 +136,7 @@ export default function PrimeStateApp() {
     const result = await scanFood(blob, TEST_TOKEN);
     
     // Auto-fix: If backend still reports missing profile after scan
-    if (!result && error && error.includes("Profile not found")) {
+    if (!result && scanError && scanError.includes("Profile not found")) {
         console.warn("[PRIME-AUTOFIX] Perfil no encontrado en servidor, abriendo configuración...");
         setShowProfileSetup(true);
         return;
