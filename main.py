@@ -1,9 +1,10 @@
 import io
 import os
 import json
+from pydantic import BaseModel
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from models import UploadResponse, UserProfile, FoodAnalysisResult, ProfileSyncResponse
+from models import UploadResponse, UserProfile, FoodAnalysisResult, ProfileSyncResponse, AdvisorRequest
 from ai_service import VisionInferenceService
 from advisor_service import AdvisorService
 from logic_service import calculate_tmb, evaluate_intervention, suggest_goals
@@ -12,7 +13,7 @@ from analytics_service import AnalyticsService
 from dopamine_engine import DopamineInterventionEngine
 from db_service import DBService
 from auth import get_current_user
-from models import UploadResponse, UserProfile, FoodAnalysisResult, ProfileSyncResponse, AdvisorRequest
+
 import uvicorn
 from datetime import date
 
