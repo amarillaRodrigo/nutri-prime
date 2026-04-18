@@ -290,6 +290,10 @@ async def log_manual_food(
     try:
         # Construct the entry data for DBService.create_food_entry
         # Note: We align the structure with how DB expects it (from main.py logic)
+        # Map nutritional quality to a score for the DB
+        score_map = {"BUENO": 10, "MODERADO": 6, "MALO": 2}
+        score = score_map.get(request.veredicto, 5)
+
         entry_data = {
             "user_id": user_id,
             "food_name": f"{request.nombre} ({request.grams}g)",
@@ -297,14 +301,12 @@ async def log_manual_food(
             "macros": {
                 "protein": request.protein,
                 "carbs": request.carbs,
-                "fat": request.fat
+                "fat": request.fat,
+                "is_manual": True
             },
-            "metadata": {
-                "veredicto": request.veredicto,
-                "justificacion": request.justificacion,
-                "is_manual": True,
-                "grams": request.grams
-            }
+            "nutrition_score": score,
+            "veredicto": request.veredicto,
+            "justificacion": request.justificacion
         }
         
         db_res = await DBService.create_food_entry(entry_data)
