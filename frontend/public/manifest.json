@@ -1,0 +1,17 @@
+{
+  "name": "Prime State AI",
+  "short_name": "Prime State",
+  "description": "High performance nutrition tracking powered by Gemini 2.0",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#00d1b2",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3075/3075977.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

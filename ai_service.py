@@ -1,0 +1,81 @@
+import os
+import json
+from google import genai
+from google.genai import types
+from dotenv import load_dotenv
+from models import FoodAnalysisResult
+from typing import Optional
+
+# Load environment variables
+load_dotenv()
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY not found in environment variables.")
+
+# New SDK Client
+client = genai.Client(api_key=GEMINI_API_KEY)
+
+# Tool definition for structured output
+# Gemini 1.5 Flash supports response_mime_type="application/json"
+# We will use this to ensure the output matches our Pydantic model.
+
+SYSTEM_PROMPT = """
+Eres un Agente Ingeniero de IA y experto en nutrición operando en 2026.
+Tu objetivo es realizar una inferencia visual multimodal de alta precisión para la app 'Prime State'.
+
+REGLAS DE INFERENCIA (Chain-of-Thought):
+1. ANÁLISIS DE ESCALA: Busca referencias visuales 2D (cubiertos, manos, servilletas). Si no hay, asume un plato estándar de 25cm. Calibra el volumen basándote en profundidad y superficie visible.
+2. COMIDAS DE OLLA: Si detectas preparaciones como 'Guiso', 'Sopa' o 'Potaje', ignora lo visible en la superficie y estima basándote en densidades calóricas estándar para estos platos (densidad media 1.2 - 1.5 kcal/g).
+3. DESGLOSE DE MACROS: Calcula proteína, carbohidratos y grasas. La suma calórica debe ser coherente (4/4/9 kcal por gramo).
+4. CALIDAD NUTRICIONAL: Puntúa de 1 (ultraprocesado) a 10 (mínimamente procesado/densidad alta).
+
+SALIDA:
+Debes responder ESTRICTAMENTE con un JSON válido que siga este esquema:
+{
+  "alimento": str,
+  "cantidad_estimada_gramos": int,
+  "proteina": float,
+  "carbohidratos": float,
+  "grasas": float,
+  "calidad_nutricional": int (1-10),
+  "food_items": [{"nombre": str, "porcion_estimada": str}],
+  "total_estimated_calories": int
+}
+"""
+
+class VisionInferenceService:
+    def __init__(self):
+        # Using the new SDK client pattern
+        self.model_id = "gemini-1.5-flash"
+
+    async def analyze_food_image(self, image_bytes: bytes, mime_type: str = "image/jpeg") -> FoodAnalysisResult:
+        """
+        Sends raw image bytes to Gemini using the modern google-genai SDK (Async).
+        """
+        try:
+            response = await client.aio.models.generate_content(
+                model=self.model_id,
+                contents=[
+                    types.Part.from_bytes(data=image_bytes, mime_type=mime_type),
+                    "Realiza el análisis nutricional detallado de este plato."
+                ],
+                config=types.GenerateContentConfig(
+                    system_instruction=SYSTEM_PROMPT,
+                    response_mime_type="application/json",
+                    max_output_tokens=1000,
+                )
+            )
+            
+            if not response.text:
+                raise ValueError("Gemini returned empty response.")
+                
+            analysis_dict = json.loads(response.text)
+            
+            # Pydantic validation (Zero Trust)
+            return FoodAnalysisResult(**analysis_dict)
+            
+        except Exception as e:
+            print(f"VisionInferenceService Error: {str(e)}")
+            raise e

@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* Cyber-Luxury Color Palette */
+  --color-brand-teal: #00d1b2;
+  --color-brand-red: #ff3860;
+  --color-deep-black: #050505;
+  --color-glass-white: rgba(255, 255, 255, 0.05);
+  
+  /* Backgrounds */
+  --background: #050505;
+  --foreground: #ffffff;
+  
+  /* Animations */
+  --animate-shimmer: shimmer 2s infinite linear;
+}
+
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+:root {
+  --background: #050505;
+  --foreground: #ffffff;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Inter, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Glassmorphism Utility */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Liquid Spring Physics - Perspective */
+.liquid-perspective {
+  perspective: 1000px;
+}
