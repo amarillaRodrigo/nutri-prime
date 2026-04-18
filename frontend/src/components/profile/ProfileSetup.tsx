@@ -9,6 +9,7 @@ interface ProfileSetupProps {
   isOpen: boolean;
   onSync: (profile: any) => void;
   apiBaseUrl: string;
+  authToken: string;
 }
 
 const ACTIVITY_LEVELS = [
@@ -25,7 +26,7 @@ const GOAL_TYPES = [
   { label: "Volumen (Bulk)", value: "bulk", icon: "💪" },
 ];
 
-export default function ProfileSetup({ isOpen, onSync, apiBaseUrl }: ProfileSetupProps) {
+export default function ProfileSetup({ isOpen, onSync, apiBaseUrl, authToken }: ProfileSetupProps) {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     weight_kg: 80,
