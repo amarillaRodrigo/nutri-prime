@@ -25,12 +25,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Prime State API", version="2.0.0", lifespan=lifespan)
 
 # CORS setup
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-    allow_credentials=True,
-    expose_headers=["*"]
+app.add_middleware(CORSMiddleware, allow_origins=["https://nutri-prime.vercel.app"], allow_methods=["*"], allow_headers=["*"], allow_credentials=True, expose_headers=["*"])
 
 # Initialize services
 vision_service = VisionInferenceService()
