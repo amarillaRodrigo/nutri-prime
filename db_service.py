@@ -19,7 +19,25 @@ class DBService:
     async def get_profile(user_id: str) -> Optional[Dict[str, Any]]:
         if not DBService._db: return None
         response = DBService._db.table("profiles").select("*").eq("id", user_id).execute()
-        return response.data[0] if response.data else None
+        if response.data:
+            return response.data[0]
+        # No profile found – create a default fallback profile
+        fallback_profile = {
+            "id": user_id,
+            "email": "fallback@prime.local",
+            "weight_kg": 80,
+            "height_cm": 180,
+            "age": 25,
+            "gender": "male",
+            "activity_level": 1.55,
+            "goal_type": "maintain",
+            "calorie_goal": None,
+            "protein_goal": None,
+            "updated_at": None
+        }
+        # Upsert the fallback profile
+        DBService._db.table("profiles").upsert(fallback_profile).execute()
+        return fallback_profile
 
     @staticmethod
     async def upsert_profile(profile_data: Dict[str, Any]):

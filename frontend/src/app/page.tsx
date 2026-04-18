@@ -81,6 +81,38 @@ export default function PrimeStateApp() {
     }
   }, [isInitializing, userProfile]);
 
+  // Helper: ensure server has profile, otherwise sync it
+  const ensureProfileSynced = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/profile`, {
+        headers: { Authorization: `Bearer ${TEST_TOKEN}` },
+      });
+      if (res.ok) return true; // already exists
+      // If 404, attempt sync using current local profile
+      if (res.status === 404 && userProfile) {
+        console.warn('[PRIME-AUTOSYNC] Perfil no encontrado en servidor, sincronizando automáticamente...');
+        const syncRes = await fetch(`${API_BASE}/sync-profile`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${TEST_TOKEN}`,
+          },
+          body: JSON.stringify(userProfile),
+        });
+        if (!syncRes.ok) {
+          const errData = await syncRes.json().catch(() => ({}));
+          throw new Error(errData.detail || `Sync failed: ${syncRes.status}`);
+        }
+        const data = await syncRes.json();
+        handleProfileSync(data.profile);
+        return true;
+      }
+    } catch (e) {
+      console.error('[PRIME-AUTOSYNC] Error al intentar sincronizar perfil', e);
+    }
+    return false;
+  };
+
   const fetchHistory = async () => {
     try {
         const res = await fetch(`${API_BASE}/history?limit=5`, {
@@ -94,10 +126,17 @@ export default function PrimeStateApp() {
   };
 
   const handleCapture = async (blob: Blob) => {
+    // Ensure profile exists on backend before uploading image
+    const profileReady = await ensureProfileSynced();
+    if (!profileReady) {
+      setShowProfileSetup(true);
+      return;
+    }
+
     const result = await scanFood(blob, TEST_TOKEN);
     
-    // Auto-fix: If backend doesn't know the user, force a sync
-    if (scanError && scanError.includes("Profile not found")) {
+    // Auto-fix: If backend still reports missing profile after scan
+    if (!result && error && error.includes("Profile not found")) {
         console.warn("[PRIME-AUTOFIX] Perfil no encontrado en servidor, abriendo configuración...");
         setShowProfileSetup(true);
         return;

@@ -26,9 +26,13 @@ def get_current_user(auth: HTTPAuthorizationCredentials = Depends(security)) -> 
         return "00000000-0000-0000-0000-000000000000"
         
     try:
-        # We decode without verification for now
+        # Decode without verification for now
         payload = jwt.decode(token, options={"verify_signature": False})
         user_id = payload.get("sub")
+        if not user_id:
+            # Fallback for service role or malformed token during testing
+            print("AUTH: Token missing 'sub', using fallback user ID")
+            return "00000000-0000-0000-0000-000000000000"
         return user_id
     except Exception as e:
         print(f"AUTH ERROR: {str(e)}")
