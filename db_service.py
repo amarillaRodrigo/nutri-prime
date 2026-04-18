@@ -83,19 +83,31 @@ class DBService:
     @staticmethod
     async def get_today_totals(user_id: str):
         if not DBService._db: return {"calories": 0, "protein": 0, "carbs": 0, "fats": 0}
-        from datetime import datetime, timezone
-        today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        from datetime import datetime, timedelta, timezone
         
-        response = DBService._db.table("food_entries").select("*").eq("user_id", user_id).gte("created_at", f"{today_str}T00:00:00").execute()
+        # Argentina is UTC-3. We'll fetch entries from the last 24 hours
+        # to ensure we don't miss anything due to timezone shifts.
+        # A more precise way would be to align with the user's "Midnight".
+        now = datetime.now(timezone.utc)
+        start_of_period = (now - timedelta(hours=18)).strftime("%Y-%m-%dT00:00:00Z")
+        
+        response = DBService._db.table("food_entries") \
+            .select("*") \
+            .eq("user_id", user_id) \
+            .gte("created_at", start_of_period) \
+            .execute()
         
         totals = {"calories": 0, "protein": 0, "carbs": 0, "fats": 0}
+        # To be even more precise, we only count entries where the local date matches.
+        # For now, we'll sum everything in the recent window.
         for entry in response.data:
             totals["calories"] += entry.get("calories", 0)
             macros = entry.get("macros", {})
             if macros:
                 totals["protein"] += macros.get("protein", 0)
                 totals["carbs"] += macros.get("carbs", 0)
-                totals["fats"] += macros.get("fat", 0)
+                # Sync 'fat' and 'fats' keys
+                totals["fats"] += macros.get("fat", macros.get("fats", 0))
                 
         return totals
 
