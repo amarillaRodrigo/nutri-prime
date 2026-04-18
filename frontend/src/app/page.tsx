@@ -10,6 +10,32 @@ import { useFoodScan } from "@/hooks/useFoodScan";
 import { Trophy, Settings } from "lucide-react";
 import { sanitizeApiUrl } from "@/lib/utils";
 
+const LiveClock = () => {
+  const [time, setTime] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setTime(new Date());
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  if (!time) return <div className="h-20" />;
+
+  return (
+    <div className="flex flex-col items-center justify-center space-y-1 py-4 border-b border-white/5 mb-8">
+      <span className="text-zinc-500 text-xs font-black uppercase tracking-[0.3em]">
+        {time.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+      </span>
+      <span className="text-4xl font-black tabular-nums tracking-tighter text-white">
+        {time.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+      </span>
+      <span className="text-[10px] text-brand-teal uppercase font-bold tracking-widest mt-2 flex items-center gap-1">
+        <span className="w-2 h-2 rounded-full bg-brand-teal animate-pulse" /> Daily Counters Flowing
+      </span>
+    </div>
+  );
+};
+
 export default function PrimeStateApp() {
     const API_BASE = sanitizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
     
@@ -24,6 +50,7 @@ export default function PrimeStateApp() {
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [scanHistory, setScanHistory] = useState<any[]>([]);
+  const [todayTotals, setTodayTotals] = useState<any>(null);
   const [isInitializing, setIsInitializing] = useState(true);
 
   // For testing: Hardcoded token
@@ -118,8 +145,13 @@ export default function PrimeStateApp() {
         const res = await fetch(`${API_BASE}/history?limit=5`, {
             headers: { "Authorization": `Bearer ${TEST_TOKEN}` }
         });
-        const data = await res.json();
-        if (data.history) setScanHistory(data.history);
+        if (res.ok) {
+            const data = await res.json();
+            setScanHistory(data.history || []);
+            if (data.today_totals) {
+                setTodayTotals(data.today_totals);
+            }
+        }
     } catch (e) {
         console.error("Failed to fetch history", e);
     }
@@ -187,6 +219,8 @@ export default function PrimeStateApp() {
         </button>
       </header>
 
+      <LiveClock />
+
       {/* Global Error Display */}
       {scanError && (
         <motion.div 
@@ -210,9 +244,11 @@ export default function PrimeStateApp() {
       <section>
         <TrendsDashboard 
           metrics={{
-            protein: lastAnalysis?.analysis.proteina || 0,
-            caloriesRemaining: lastAnalysis?.calories_remaining || (userProfile?.calorie_goal || 2000),
-            willpowerScore: lastAnalysis?.analysis.calidad_nutricional || 0,
+            protein: todayTotals?.protein || 0,
+            carbs: todayTotals?.carbs || 0,
+            fats: todayTotals?.fats || 0,
+            caloriesRemaining: userProfile?.calorie_goal ? Math.max(0, userProfile.calorie_goal - (todayTotals?.calories || 0)) : (lastAnalysis?.calories_remaining || 2000),
+            willpowerScore: lastAnalysis?.analysis?.calidad_nutricional || 0,
             proteinGoal: userProfile?.protein_goal || 160
           }}
           trendImageUrl={`${API_BASE}/analytics/trends`} 

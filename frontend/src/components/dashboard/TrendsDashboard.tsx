@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Zap, Flame, Trophy, TrendingUp } from "lucide-react";
+import { Zap, Flame, Trophy, TrendingUp, Wheat, Droplet } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MetricCardProps {
@@ -45,6 +45,8 @@ interface HistoryEntry {
 interface TrendsDashboardProps {
   metrics: {
     protein: number;
+    carbs?: number;
+    fats?: number;
     caloriesRemaining: number;
     willpowerScore: number;
     proteinGoal?: number;
@@ -57,13 +59,27 @@ export default function TrendsDashboard({ metrics, trendImageUrl, history = [] }
   return (
     <div className="w-full space-y-8 pb-12">
       {/* Metrics Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         <MetricCard
           title="Proteína"
           value={metrics.protein}
-          unit="gramos"
+          unit="g"
           icon={<Zap size={24} className="text-brand-teal" />}
           color="text-brand-teal"
+        />
+        <MetricCard
+          title="Carbos"
+          value={metrics.carbs || 0}
+          unit="g"
+          icon={<Wheat size={24} className="text-amber-400" />}
+          color="text-amber-400"
+        />
+        <MetricCard
+          title="Grasas"
+          value={metrics.fats || 0}
+          unit="g"
+          icon={<Droplet size={24} className="text-yellow-200" />}
+          color="text-yellow-200"
         />
         <MetricCard
           title="Restante"

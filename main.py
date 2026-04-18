@@ -202,7 +202,11 @@ async def get_history(
     """
     try:
         history = await DBService.get_food_history(user_id, limit)
-        return {"history": history}
+        today_totals = await DBService.get_today_totals(user_id)
+        return {
+            "history": history,
+            "today_totals": today_totals
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

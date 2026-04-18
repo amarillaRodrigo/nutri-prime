@@ -56,6 +56,25 @@ class DBService:
         return response.data[0] if response.data else None
 
     @staticmethod
+    async def get_today_totals(user_id: str):
+        if not DBService._db: return {"calories": 0, "protein": 0, "carbs": 0, "fats": 0}
+        from datetime import datetime, timezone
+        today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        
+        response = DBService._db.table("food_entries").select("*").eq("user_id", user_id).gte("created_at", f"{today_str}T00:00:00").execute()
+        
+        totals = {"calories": 0, "protein": 0, "carbs": 0, "fats": 0}
+        for entry in response.data:
+            totals["calories"] += entry.get("calories", 0)
+            macros = entry.get("macros", {})
+            if macros:
+                totals["protein"] += macros.get("protein", 0)
+                totals["carbs"] += macros.get("carbs", 0)
+                totals["fats"] += macros.get("fat", 0)
+                
+        return totals
+
+    @staticmethod
     async def update_daily_log_totals(user_id: str, date_str: str, calories: int, protein: float):
         if not DBService._db: return None
         # This is a simplified version. In a real app, you'd use a RPC or atomic update.
