@@ -22,7 +22,7 @@ const MetricCard = ({ title, value, max, hideMax, unit, icon, color }: MetricCar
     className="glass p-5 sm:p-6 rounded-3xl flex flex-col gap-3 sm:gap-4 relative overflow-hidden"
   >
     <div className={cn("p-2.5 sm:p-3 w-fit rounded-2xl bg-opacity-10", color)}>
-      {React.cloneElement(icon as React.ReactElement, { size: 20 })}
+      {React.cloneElement(icon as any, { size: 20 })}
     </div>
     <div>
       <p className="text-zinc-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider">{title}</p>
