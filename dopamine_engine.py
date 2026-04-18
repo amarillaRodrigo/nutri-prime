@@ -20,11 +20,11 @@ class DopamineInterventionEngine:
         if nutrition_score < self.threshold:
             trigger_intervention = True
             # Fetch a random motivation asset for low scores
-            from db_service import supabase
-            if supabase:
+            db = DBService._db
+            if db:
                 try:
                     # Filter assets that match the current low score
-                    response = supabase.table("motivation_assets")\
+                    response = db.table("motivation_assets")\
                         .select("*")\
                         .lte("min_score", nutrition_score)\
                         .gte("max_score", nutrition_score)\
