@@ -146,18 +146,32 @@ export default function PrimeStateApp() {
 
   const fetchHistory = async () => {
     try {
-        const res = await fetch(`${API_BASE}/history?limit=5`, {
+        // Global Sync: Fetch both history and profile to ensure cross-device consistency
+        const [histRes, profRes] = await Promise.all([
+          fetch(`${API_BASE}/history?limit=10`, {
             headers: { "Authorization": `Bearer ${TEST_TOKEN}` }
-        });
-        if (res.ok) {
-            const data = await res.json();
+          }),
+          fetch(`${API_BASE}/profile`, {
+            headers: { "Authorization": `Bearer ${TEST_TOKEN}` }
+          })
+        ]);
+
+        if (histRes.ok) {
+            const data = await histRes.json();
             setScanHistory(data.history || []);
             if (data.today_totals) {
                 setTodayTotals(data.today_totals);
             }
         }
+
+        if (profRes.ok) {
+            const profile = await profRes.json();
+            setUserProfile(profile);
+            localStorage.setItem("prime_user_profile", JSON.stringify(profile));
+            setShowProfileSetup(false);
+        }
     } catch (e) {
-        console.error("Failed to fetch history", e);
+        console.error("[PRIME-SYNC] Error de sincronización global", e);
     }
   };
 
