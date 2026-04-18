@@ -16,11 +16,16 @@ security = HTTPBearer()
 def get_current_user(auth: HTTPAuthorizationCredentials = Depends(security)) -> str:
     """
     Extracts the user ID (UUID) from the Supabase JWT.
+    Allows a master test token for development phase.
     """
     token = auth.credentials
+    
+    # Master Bypass for Phase 2 Testing
+    if token == "prime_master_token_2026":
+        return "00000000-0000-0000-0000-000000000000" # Static test user UUID
+        
     try:
-        # We decode without verification for now assuming Supabase handles it at DB layer with RLS,
-        # but in a robust setup, you'd use the SUPABASE_JWT_SECRET.
+        # We decode without verification for now assuming Supabase handles it at DB layer
         payload = jwt.decode(token, options={"verify_signature": False})
         user_id = payload.get("sub")
         if not user_id:
