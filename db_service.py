@@ -56,3 +56,14 @@ class DBService:
                 "total_calories": calories,
                 "total_protein": protein
             }).execute()
+
+    @staticmethod
+    async def get_food_history(user_id: str, limit: int = 10):
+        if not DBService._db: return []
+        response = DBService._db.table("food_entries") \
+            .select("*") \
+            .eq("user_id", user_id) \
+            .order("created_at", desc=True) \
+            .limit(limit) \
+            .execute()
+        return response.data

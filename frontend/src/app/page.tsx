@@ -23,30 +23,81 @@ export default function PrimeStateApp() {
   const [showDopamineRoom, setShowDopamineRoom] = useState(false);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [scanHistory, setScanHistory] = useState<any[]>([]);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   // For testing: Hardcoded token
   const TEST_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpemtsaG5jZm1rYXpwb3BqemF3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjQ4MDE1NywiZXhwIjoyMDkyMDU2MTU3fQ._nQQ_z2NG7_Kfvrjm6D1stqLR3VTuje4KvWvd5WlK3A";
 
-  // Check profile on load
+  // 1. Initial Load: Server-First Persistence
   useEffect(() => {
-    // If we don't have a profile in state, show the setup immediately
-    if (!userProfile) {
-      setShowProfileSetup(true);
-    }
-    
-    const checkProfile = async () => {
+    const initializeApp = async () => {
+        console.log("[PRIME-INIT] Verificando identidad en el Cerebro...");
+        
+        // Try LocalStorage first for instant UI
+        const savedProfile = localStorage.getItem("prime_user_profile");
+        if (savedProfile) {
+            try {
+                setUserProfile(JSON.parse(savedProfile));
+                setShowProfileSetup(false);
+                setIsInitializing(false);
+                console.log("[PRIME-INIT] Perfil recuperado de memoria local.");
+                return;
+            } catch (e) {
+                console.warn("[PRIME-INIT] Error en memoria local, consultando servidor...");
+            }
+        }
+
+        // Fallback to Backend (Source of Truth)
         try {
-            await fetch(`${API_BASE}/health`, { headers: { "Authorization": `Bearer ${TEST_TOKEN}` }});
-            // Additional check logic if needed
+            const res = await fetch(`${API_BASE}/profile`, {
+                headers: { "Authorization": `Bearer ${TEST_TOKEN}` }
+            });
+            if (res.ok) {
+                const profile = await res.json();
+                setUserProfile(profile);
+                localStorage.setItem("prime_user_profile", JSON.stringify(profile));
+                setShowProfileSetup(false);
+                console.log("[PRIME-INIT] Perfil recuperado del Cerebro (Railway).");
+            } else {
+                console.log("[PRIME-INIT] Usuario nuevo detectado.");
+                setShowProfileSetup(true);
+            }
         } catch (e) {
-            console.error("Profile check failed (probably tunnel block)", e);
+            console.error("[PRIME-INIT] Error de conexión con el Cerebro.", e);
+            setShowProfileSetup(true);
+        } finally {
+            setIsInitializing(false);
         }
     };
-    checkProfile();
-  }, [userProfile]);
+    
+    if (API_BASE) initializeApp();
+  }, [API_BASE]);
+
+  // 2. Health & Warmup (Background) + History Fetch
+  useEffect(() => {
+    if (!isInitializing && userProfile) {
+        fetchHistory();
+    }
+  }, [isInitializing, userProfile]);
+
+  const fetchHistory = async () => {
+    try {
+        const res = await fetch(`${API_BASE}/history?limit=5`, {
+            headers: { "Authorization": `Bearer ${TEST_TOKEN}` }
+        });
+        const data = await res.json();
+        if (data.history) setScanHistory(data.history);
+    } catch (e) {
+        console.error("Failed to fetch history", e);
+    }
+  };
 
   const handleCapture = async (blob: Blob) => {
     const result = await scanFood(blob, TEST_TOKEN);
+    if (result) {
+        fetchHistory(); // Refresh history after scan
+    }
     if (result?.motivation_mode_active) {
       setShowDopamineRoom(true);
     }
@@ -54,8 +105,17 @@ export default function PrimeStateApp() {
 
   const handleProfileSync = (profile: any) => {
     setUserProfile(profile);
+    localStorage.setItem("prime_user_profile", JSON.stringify(profile));
     setShowProfileSetup(false);
   };
+
+  if (isInitializing) {
+    return (
+        <div className="min-h-screen bg-black flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full border-t-2 border-brand-teal animate-spin" />
+        </div>
+    );
+  }
 
   return (
     <main className="relative min-h-screen px-6 pt-12 max-w-2xl mx-auto flex flex-col gap-12">
@@ -98,6 +158,7 @@ export default function PrimeStateApp() {
             proteinGoal: userProfile?.protein_goal || 160
           }}
           trendImageUrl={`${API_BASE}/analytics/trends`} 
+          history={scanHistory}
         />
       </section>
 

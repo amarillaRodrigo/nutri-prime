@@ -75,6 +75,22 @@ async def sync_profile(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/profile", response_model=UserProfile)
+async def get_user_profile(
+    user_id: str = Depends(get_current_user)
+):
+    """
+    Retrieves the user's profile from Supabase.
+    """
+    try:
+        profile = await DBService.get_profile(user_id)
+        if not profile:
+            raise HTTPException(status_code=404, detail="Profile not found")
+        return profile
+    except Exception as e:
+        if "404" in str(e): raise e
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/upload-image", response_model=UploadResponse)
 async def upload_image(
     file: UploadFile = File(...),
@@ -110,7 +126,9 @@ async def upload_image(
                 "carbs": analysis.carbohidratos,
                 "fat": analysis.grasas
             },
-            "nutrition_score": analysis.calidad_nutricional
+            "nutrition_score": analysis.calidad_nutricional,
+            "veredicto": analysis.veredicto,
+            "justificacion": analysis.justificacion
         }
         await DBService.create_food_entry(entry_payload)
         
@@ -124,12 +142,10 @@ async def upload_image(
         )
         
         # 5. Logic & Dopamine Intervention
-        # We fetch the updated log to see remaining calories
         updated_log = await DBService.get_daily_log(user_id, today)
         daily_goal = profile_data.get("calorie_goal", 2000)
         calories_remaining = daily_goal - updated_log["total_calories"]
         
-        # New: Dopamine Intervention Engine evaluation
         intervention_data = await dopamine_engine.evaluate_and_get_asset(
             nutrition_score=analysis.calidad_nutricional,
             user_id=user_id
@@ -142,8 +158,7 @@ async def upload_image(
             analysis=analysis,
             motivation_mode_active=trigger_intervention,
             calories_remaining=calories_remaining,
-            message=intervention_data["message"] or "Registro guardado.",
-            # Note: For Phase 3, you might want to extend UploadResponse to include the asset_url
+            message=analysis.justificacion or intervention_data["message"] or "Registro guardado.",
         )
 
     except Exception as e:
@@ -176,6 +191,20 @@ async def get_trends(
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Analytics Error: {str(e)}")
+
+@app.get("/history")
+async def get_history(
+    user_id: str = Depends(get_current_user),
+    limit: int = 10
+):
+    """
+    Returns the latest food scanning history for the user.
+    """
+    try:
+        history = await DBService.get_food_history(user_id, limit)
+        return {"history": history}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))

@@ -36,6 +36,8 @@ class FoodAnalysisResult(BaseModel):
     carbohidratos: float
     grasas: float
     calidad_nutricional: int = Field(ge=1, le=10)
+    veredicto: str = Field(..., pattern="^(BUENO|MALO|MODERADO)$")
+    justificacion: str
     food_items: List[FoodItem]
     total_estimated_calories: int
 

@@ -33,6 +33,15 @@ const MetricCard = ({ title, value, unit, icon, color }: MetricCardProps) => (
   </motion.div>
 );
 
+interface HistoryEntry {
+  id: string;
+  food_name: string;
+  calories: number;
+  veredicto?: "BUENO" | "MALO" | "MODERADO";
+  justificacion?: string;
+  created_at: string;
+}
+
 interface TrendsDashboardProps {
   metrics: {
     protein: number;
@@ -41,9 +50,10 @@ interface TrendsDashboardProps {
     proteinGoal?: number;
   };
   trendImageUrl?: string;
+  history?: HistoryEntry[];
 }
 
-export default function TrendsDashboard({ metrics, trendImageUrl }: TrendsDashboardProps) {
+export default function TrendsDashboard({ metrics, trendImageUrl, history = [] }: TrendsDashboardProps) {
   return (
     <div className="w-full space-y-8 pb-12">
       {/* Metrics Row */}
@@ -110,6 +120,50 @@ export default function TrendsDashboard({ metrics, trendImageUrl }: TrendsDashbo
                </p>
              </div>
           )}
+        </div>
+      </motion.div>
+
+      {/* New: History Log Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-4"
+      >
+        <div className="flex items-center justify-between px-2">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">
+                Bitácora Prime (Últimos Registros)
+            </h3>
+            <span className="text-[10px] font-bold text-brand-teal uppercase">{history.length} ITEMS</span>
+        </div>
+
+        <div className="flex flex-col gap-3">
+            {history.length > 0 ? history.map((entry) => (
+                <div key={entry.id} className="glass p-4 rounded-2xl flex items-center justify-between group transition-all hover:bg-white/[0.03]">
+                    <div className="flex flex-col gap-1">
+                        <span className="text-sm font-black uppercase tracking-tight text-white">{entry.food_name}</span>
+                        <div className="flex items-center gap-2">
+                             <div className={cn(
+                                "text-[9px] font-black uppercase px-2 py-0.5 rounded",
+                                entry.veredicto === 'BUENO' ? "bg-brand-teal/10 text-brand-teal" : 
+                                entry.veredicto === 'MALO' ? "bg-brand-red/10 text-brand-red" : "bg-zinc-400/10 text-zinc-400"
+                            )}>
+                                {entry.veredicto || 'SIN VEREDICTO'}
+                            </div>
+                            <span className="text-[10px] font-bold text-zinc-600">{entry.calories} kcal</span>
+                        </div>
+                    </div>
+                    {entry.veredicto === 'BUENO' ? 
+                        <div className="w-8 h-8 rounded-full bg-brand-teal/10 flex items-center justify-center text-brand-teal italic font-black">🔥</div> :
+                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-zinc-700 font-black">?</div>
+                    }
+                </div>
+            )) : (
+                <div className="p-8 border border-dashed border-white/5 rounded-3xl text-center">
+                    <p className="text-[10px] font-bold text-zinc-700 uppercase tracking-widest leading-relaxed">
+                        No hay registros biológicos detectados.<br/>Inicia tu primer escaneo.
+                    </p>
+                </div>
+            )}
         </div>
       </motion.div>
     </div>
