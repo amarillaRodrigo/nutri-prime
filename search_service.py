@@ -4,6 +4,7 @@ from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 from typing import List
+from fastapi import HTTPException
 from models import ManualSearchResponse, ManualSearchResult
 
 load_dotenv()
@@ -26,7 +27,7 @@ REGLAS:
 
 class SearchService:
     def __init__(self):
-        self.model_id = "gemini-2.0-flash"
+        self.model_id = "gemini-1.5-flash"
 
     async def search_food(self, query: str) -> ManualSearchResponse:
         try:
@@ -47,5 +48,9 @@ class SearchService:
             return ManualSearchResponse(**data)
 
         except Exception as e:
-            print(f"SearchService Error: {str(e)}")
+            err_msg = str(e)
+            if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg:
+                print("Gemini Search Quota Exceeded (429)")
+                raise HTTPException(status_code=429, detail="Buscador saturado. Por favor, intenta de nuevo en un minuto.")
+            print(f"SearchService Error: {err_msg}")
             raise e

@@ -4,6 +4,7 @@ from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 from typing import List, Dict, Any
+from fastapi import HTTPException
 from models import AdvisorResponse, AdvisorRequest
 
 load_dotenv()
@@ -33,7 +34,7 @@ REGLAS:
 
 class AdvisorService:
     def __init__(self):
-        self.model_id = "gemini-2.0-flash"
+        self.model_id = "gemini-1.5-flash"
 
     async def get_recommendations(self, request: AdvisorRequest) -> AdvisorResponse:
         try:
@@ -62,5 +63,9 @@ class AdvisorService:
             return AdvisorResponse(**data)
 
         except Exception as e:
-            print(f"AdvisorService Error: {str(e)}")
+            err_msg = str(e)
+            if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg:
+                print("Gemini Advisor Quota Exceeded (429)")
+                raise HTTPException(status_code=429, detail="El asesor está descansando (Cuota excedida). Intenta de nuevo en unos momentos.")
+            print(f"AdvisorService Error: {err_msg}")
             raise e

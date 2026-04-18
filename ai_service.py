@@ -47,8 +47,8 @@ REGLAS DE INFERENCIA (Chain-of-Thought):
 
 class VisionInferenceService:
     def __init__(self):
-        # Using the new SDK client pattern
-        self.model_id = "gemini-2.5-flash"
+        # Using the stable 1.5 Flash for free tier reliability
+        self.model_id = "gemini-1.5-flash"
 
     async def analyze_food_image(self, image_bytes: bytes, mime_type: str = "image/jpeg") -> FoodAnalysisResult:
         """
@@ -77,5 +77,9 @@ class VisionInferenceService:
             return FoodAnalysisResult(**analysis_dict)
             
         except Exception as e:
-            print(f"VisionInferenceService Error: {str(e)}")
+            err_msg = str(e)
+            if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg:
+                print("Gemini Quota Exceeded (429)")
+                raise HTTPException(status_code=429, detail="El cerebro de la IA está saturado por hoy (Cuota excedida). Intenta de nuevo en unos segundos.")
+            print(f"VisionInferenceService Error: {err_msg}")
             raise e
