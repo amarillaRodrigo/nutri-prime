@@ -187,6 +187,7 @@ export default function PrimeStateApp() {
         onSync={handleProfileSync}
         apiBaseUrl={API_BASE}
         authToken={TEST_TOKEN}
+        initialData={userProfile}
       />
 
       {/* Interventions */}

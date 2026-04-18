@@ -10,6 +10,7 @@ interface ProfileSetupProps {
   onSync: (profile: any) => void;
   apiBaseUrl: string;
   authToken: string;
+  initialData?: any;
 }
 
 const ACTIVITY_LEVELS = [
@@ -26,7 +27,7 @@ const GOAL_TYPES = [
   { label: "Volumen (Bulk)", value: "bulk", icon: "💪" },
 ];
 
-export default function ProfileSetup({ isOpen, onSync, apiBaseUrl, authToken }: ProfileSetupProps) {
+export default function ProfileSetup({ isOpen, onSync, apiBaseUrl, authToken, initialData }: ProfileSetupProps) {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     weight_kg: 80,
@@ -38,6 +39,16 @@ export default function ProfileSetup({ isOpen, onSync, apiBaseUrl, authToken }: 
     calorie_goal_override: null as number | null,
     protein_goal_override: null as number | null,
   });
+
+  // Sync formData with initialData when it changes or modal opens
+  useEffect(() => {
+    if (initialData) {
+        setFormData(prev => ({
+            ...prev,
+            ...initialData
+        }));
+    }
+  }, [initialData, isOpen]);
 
   const [suggestions, setSuggestions] = useState({ calorie_goal: 0, protein_goal: 0 });
   const [isSyncing, setIsSyncing] = useState(false);
@@ -81,7 +92,14 @@ export default function ProfileSetup({ isOpen, onSync, apiBaseUrl, authToken }: 
         body: JSON.stringify(formData),
       });
       
-      if (!response.ok) throw new Error(`Error ${response.status}: Ruta -> ${targetUrl}`);
+      if (!response.ok) {
+        let errorMsg = `Error ${response.status}`;
+        try {
+            const errorData = await response.json();
+            errorMsg = errorData.detail || errorMsg;
+        } catch (e) {}
+        throw new Error(errorMsg);
+      }
       
       const data = await response.json();
       onSync(data.profile);
