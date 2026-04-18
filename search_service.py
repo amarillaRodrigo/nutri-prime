@@ -27,14 +27,12 @@ REGLAS:
 
 class SearchService:
     def __init__(self):
-        # Broad list to discover any working brain in restricted regions
+        # Using verified 2026 brain list
         self.model_ids = [
-            "gemini-1.5-flash-002", 
-            "gemini-2.0-flash-exp", 
+            "gemini-2.5-flash", 
+            "gemini-2.0-flash-lite", 
             "gemini-2.0-flash", 
-            "gemini-1.5-flash", 
-            "gemini-1.5-pro",
-            "gemini-1.5-flash-8b"
+            "gemini-flash-lite-latest"
         ]
 
     async def search_food(self, query: str) -> ManualSearchResponse:

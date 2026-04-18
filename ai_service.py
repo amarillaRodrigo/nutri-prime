@@ -47,14 +47,12 @@ REGLAS DE INFERENCIA (Chain-of-Thought):
 
 class VisionInferenceService:
     def __init__(self):
-        # Fallback list for higher resilience
+        # Using verified 2026 brain list
         self.model_ids = [
-            "gemini-1.5-flash-002", 
-            "gemini-2.0-flash-exp", 
+            "gemini-2.5-flash", 
+            "gemini-2.0-flash-lite", 
             "gemini-2.0-flash", 
-            "gemini-1.5-flash", 
-            "gemini-1.5-pro",
-            "gemini-1.5-flash-8b"
+            "gemini-flash-lite-latest"
         ]
 
     async def analyze_food_image(self, image_bytes: bytes, mime_type: str = "image/jpeg") -> FoodAnalysisResult:

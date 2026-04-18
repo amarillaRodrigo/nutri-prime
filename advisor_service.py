@@ -34,14 +34,12 @@ REGLAS:
 
 class AdvisorService:
     def __init__(self):
-        # Fallback list for higher resilience
+        # Using verified 2026 brain list
         self.model_ids = [
-            "gemini-1.5-flash-002", 
-            "gemini-2.0-flash-exp", 
+            "gemini-2.5-flash", 
+            "gemini-2.0-flash-lite", 
             "gemini-2.0-flash", 
-            "gemini-1.5-flash", 
-            "gemini-1.5-pro",
-            "gemini-1.5-flash-8b"
+            "gemini-flash-lite-latest"
         ]
 
     async def get_recommendations(self, request: AdvisorRequest) -> AdvisorResponse:
