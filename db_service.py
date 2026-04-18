@@ -80,16 +80,10 @@ class DBService:
         response = DBService._db.table("daily_logs").select("*").eq("user_id", user_id).eq("date", date_str).execute()
         return response.data[0] if response.data else None
 
-    @staticmethod
-    async def get_today_totals(user_id: str):
-        if not DBService._db: return {"calories": 0, "protein": 0, "carbs": 0, "fats": 0}
-        from datetime import datetime, timedelta, timezone
-        
-        # Argentina is UTC-3. We'll fetch entries from the last 24 hours
-        # to ensure we don't miss anything due to timezone shifts.
-        # A more precise way would be to align with the user's "Midnight".
+        # Fetch entries from a wide window to account for timezone shifts
         now = datetime.now(timezone.utc)
-        start_of_period = (now - timedelta(hours=18)).strftime("%Y-%m-%dT00:00:00Z")
+        # Use a 24-hour window for safer coverage across timezones
+        start_of_period = (now - timedelta(hours=24)).strftime("%Y-%m-%dT00:00:00Z")
         
         response = DBService._db.table("food_entries") \
             .select("*") \
@@ -97,24 +91,25 @@ class DBService:
             .gte("created_at", start_of_period) \
             .execute()
         
-        totals = {"calories": 0, "protein": 0, "carbs": 0, "fats": 0}
-        # To be even more precise, we only count entries where the local date matches.
-        # For now, we'll sum everything in the recent window.
+        totals = {"calories": 0, "protein": 0, "carbs": 0, "fats": 0, "raw_count": len(response.data)}
+        
+        print(f"[CEREBRO-LOGS] Calculando totales para {user_id}. Encontradas {len(response.data)} entradas desde {start_of_period}")
+
         for entry in response.data:
-            # Defensive summing: handle cases where fields might be strings or None
             try:
-                cals = entry.get("calories") or 0
-                totals["calories"] += int(float(cals))
+                # Sum calories from both root level and potentially nested macros
+                cals = float(entry.get("calories") or 0)
+                totals["calories"] += int(cals)
                 
                 macros = entry.get("macros", {})
                 if macros:
                     totals["protein"] += float(macros.get("protein") or 0)
                     totals["carbs"] += float(macros.get("carbs") or 0)
-                    # Sync 'fat' and 'fats' keys
                     totals["fats"] += float(macros.get("fat") or macros.get("fats") or 0)
-            except (ValueError, TypeError) as e:
-                print(f"[DB-SUM-ERROR] Failed to sum entry {entry.get('id')}: {str(e)}")
+            except Exception as e:
+                print(f"[CEREBRO-ERR] Falla en suma de entrada {entry.get('id')}: {str(e)}")
                 
+        print(f"[CEREBRO-LOGS] Totales finales: {totals}")
         return totals
 
     @staticmethod
