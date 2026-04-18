@@ -70,7 +70,11 @@ export default function ProfileSetup({ isOpen, onSync, apiBaseUrl, authToken }: 
     setIsSyncing(true);
     setErrorStatus(null);
     try {
-      const cleanBase = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) : apiBaseUrl;
+      let cleanBase = apiBaseUrl.trim();
+      if (cleanBase && !cleanBase.startsWith('http')) {
+          cleanBase = `https://${cleanBase}`;
+      }
+      cleanBase = cleanBase.endsWith('/') ? cleanBase.slice(0, -1) : cleanBase;
       const response = await fetch(`${cleanBase}/sync-profile`, {
         method: "POST",
         headers: { 
