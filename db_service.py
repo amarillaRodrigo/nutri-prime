@@ -79,7 +79,11 @@ class DBService:
         if not DBService._db: return None
         response = DBService._db.table("daily_logs").select("*").eq("user_id", user_id).eq("date", date_str).execute()
         return response.data[0] if response.data else None
-
+    @staticmethod
+    async def get_today_totals(user_id: str):
+        if not DBService._db: return {"calories": 0, "protein": 0, "carbs": 0, "fats": 0}
+        from datetime import datetime, timedelta, timezone
+        
         # Fetch entries from a wide window to account for timezone shifts
         now = datetime.now(timezone.utc)
         # Use a 24-hour window for safer coverage across timezones
