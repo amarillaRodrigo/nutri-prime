@@ -22,7 +22,7 @@ git commit -m "feat: ready for cloud deployment"
 1. Ve a [github.com/new](https://github.com/new) y crea un repositorio llamado `nutri-prime`.
 2. Sigue las instrucciones para conectar tu carpeta local:
    ```bash
-   git remote add origin https://github.com/TU_USUARIO/nutri-prime.git
+   git remote add origin https://github.com/amarillaRodrigo/nutri-prime.git
    git branch -M main
    git push -u origin main
    ```
