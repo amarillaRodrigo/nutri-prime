@@ -27,8 +27,15 @@ REGLAS:
 
 class SearchService:
     def __init__(self):
-        # Expanded list for discovery
-        self.model_ids = ["gemini-1.5-flash-002", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-flash-8b"]
+        # Broad list to discover any working brain in restricted regions
+        self.model_ids = [
+            "gemini-1.5-flash-002", 
+            "gemini-2.0-flash-exp", 
+            "gemini-2.0-flash", 
+            "gemini-1.5-flash", 
+            "gemini-1.5-pro",
+            "gemini-1.5-flash-8b"
+        ]
 
     async def search_food(self, query: str) -> ManualSearchResponse:
         last_err = None

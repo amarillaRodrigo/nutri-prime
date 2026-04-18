@@ -35,7 +35,14 @@ REGLAS:
 class AdvisorService:
     def __init__(self):
         # Fallback list for higher resilience
-        self.model_ids = ["gemini-1.5-flash-002", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-flash-8b"]
+        self.model_ids = [
+            "gemini-1.5-flash-002", 
+            "gemini-2.0-flash-exp", 
+            "gemini-2.0-flash", 
+            "gemini-1.5-flash", 
+            "gemini-1.5-pro",
+            "gemini-1.5-flash-8b"
+        ]
 
     async def get_recommendations(self, request: AdvisorRequest) -> AdvisorResponse:
         last_err = None

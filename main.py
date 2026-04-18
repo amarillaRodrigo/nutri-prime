@@ -14,9 +14,12 @@ from dopamine_engine import DopamineInterventionEngine
 from db_service import DBService
 from auth import get_current_user
 from models import UploadResponse, UserProfile, FoodAnalysisResult, ProfileSyncResponse, AdvisorRequest, ManualSearchResponse, ManualLogRequest, ManualSearchResult
-
+from google import genai
 import uvicorn
 from datetime import date
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 from contextlib import asynccontextmanager
 
