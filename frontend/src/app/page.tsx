@@ -95,6 +95,14 @@ export default function PrimeStateApp() {
 
   const handleCapture = async (blob: Blob) => {
     const result = await scanFood(blob, TEST_TOKEN);
+    
+    // Auto-fix: If backend doesn't know the user, force a sync
+    if (scanError && scanError.includes("Profile not found")) {
+        console.warn("[PRIME-AUTOFIX] Perfil no encontrado en servidor, abriendo configuración...");
+        setShowProfileSetup(true);
+        return;
+    }
+
     if (result) {
         fetchHistory(); // Refresh history after scan
     }
