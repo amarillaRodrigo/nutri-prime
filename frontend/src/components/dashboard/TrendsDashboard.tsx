@@ -4,6 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Zap, Flame, Trophy, TrendingUp, Wheat, Droplet, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import StrategyAdvisor from '../StrategyAdvisor';
 
 interface MetricCardProps {
   title: string;
@@ -111,6 +112,13 @@ export default function TrendsDashboard({ metrics, trendImageUrl, history = [], 
           color="text-yellow-500"
         />
       </div>
+
+      {/* --- STRATEGY ADVISOR (WAR ROOM) --- */}
+      <StrategyAdvisor 
+        apiBaseUrl={process.env.NEXT_PUBLIC_API_URL || "https://prime-state-api.loca.lt"} 
+        authToken="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpemtsaG5jZm1rYXpwb3BqemF3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjQ4MDE1NywiZXhwIjoyMDkyMDU2MTU3fQ._nQQ_z2NG7_Kfvrjm6D1stqLR3VTuje4KvWvd5WlK3A"
+        metrics={metrics}
+      />
 
       {/* Main Trend Visualization */}
       <motion.div

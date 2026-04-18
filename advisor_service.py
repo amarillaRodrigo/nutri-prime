@@ -12,29 +12,34 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 ADVISOR_PROMPT = """
-Eres el 'Prime State Advisor', un experto en biohacking y nutrición de 2026.
-Tu misión es ayudar al usuario a alcanzar sus objetivos físicos basándote en lo que le queda comer hoy y lo que tiene disponible.
+Eres el 'Prime State Emergency Advisor', un estratega de biohacking de 2026.
+Tu misión es salvar el día del usuario basándote en lo que ya consumió y lo que planea hacer.
 
-CONTEXTO NUTRICIONAL RESTANTE:
-- Calorías: {calories_left} kcal
-- Proteína: {protein_left} g
-- Carbohidratos: {carbs_left} g
-- Grasas: {fat_left} g
+CONTEXTO NUTRICIONAL ACTUAL:
+- Consumido: {calories_c} kcal (P: {protein_c}g, C: {carbs_c}g, F: {fat_c}g)
+- Restante: {calories_l} kcal (P: {protein_l}g, C: {carbs_l}g, F: {fat_l}g)
 
-LO QUE EL USUARIO TIENE DISPONIBLE:
+MODO ESPECIAL:
+- Ir al boliche hoy: {is_party}
+
+REGLAS DE ESTRATEGIA:
+1. ANÁLISIS DE EXCESOS: Si el usuario ya consumió de más en algún macro (ej: grasa > meta), la estrategia debe ser de COMPENSACIÓN (priorizar proteína magra, reducir ese macro al mínimo).
+2. MODO BOLICHE: Si va al boliche, instruye sobre:
+   - Estrategia de hidratación (ej: técnica del 1:1 agua/alcohol).
+   - Mitigación calórica (qué alcohol elegir si va a tomar).
+   - Qué comer ANTES de salir y qué evitar al volver.
+3. TONO PRIME: Sé rudo pero efectivo. "Dammit, te pasaste de grasas. Aquí está cómo arreglarlo." o "Hoy se sale, aquí está tu plan de batalla."
+4. INGREDIENTES DISPONIBLES: Si el usuario lista comida, úsala.
 {available_food}
 
-REGLAS:
-1. Sé creativo pero práctico. Si el usuario tiene pocos ingredientes, sugiere combinaciones inteligentes o alimentos individuales.
-2. Prioriza cubrir la proteína faltante. La proteína es la ley.
-3. El tono debe ser directo, ligeramente agresivo/motivador (estilo Prime State), pero profesional.
-4. Genera sugerencias que se ajusten lo mejor posible a los macros restantes.
-5. No inventes ingredientes que no estén en la lista, a menos que sean básicos (sal, pimienta, agua).
+ESQUEMA DE RESPUESTA:
+- emergency_strategy: Texto motivador y estratégico de alto impacto (formato Markdown).
+- context_message: Un resumen corto del estado actual.
+- suggestions: Lista de comidas específicas para el resto del día.
 """
 
 class AdvisorService:
     def __init__(self):
-        # Using verified 2026 brain list
         self.model_ids = [
             "gemini-2.5-flash", 
             "gemini-2.0-flash-lite", 
@@ -45,11 +50,16 @@ class AdvisorService:
     async def get_recommendations(self, request: AdvisorRequest) -> AdvisorResponse:
         last_err = None
         prompt = ADVISOR_PROMPT.format(
-            calories_left=request.calories_left,
-            protein_left=request.protein_left,
-            carbs_left=request.carbs_left,
-            fat_left=request.fat_left,
-            available_food=request.available_food
+            calories_c=request.calories_consumed,
+            protein_c=request.protein_consumed,
+            carbs_c=request.carbs_consumed,
+            fat_c=request.fat_consumed,
+            calories_l=request.calories_left,
+            protein_l=request.protein_left,
+            carbs_l=request.carbs_left,
+            fat_l=request.fat_left,
+            is_party="SÍ" if request.is_party_mode else "NO",
+            available_food=f"COMIDA DISPONIBLE: {request.available_food}" if request.available_food else "No se especificó comida disponible."
         )
 
         for model_id in self.model_ids:

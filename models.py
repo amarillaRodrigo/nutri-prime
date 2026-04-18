@@ -73,10 +73,17 @@ class AdvisorRequest(BaseModel):
     protein_left: float
     carbs_left: float
     fat_left: float
+    # Fields for excess analysis
+    calories_consumed: float = 0
+    protein_consumed: float = 0
+    carbs_consumed: float = 0
+    fat_consumed: float = 0
+    is_party_mode: bool = False
 
 class AdvisorResponse(BaseModel):
     suggestions: List[AdvisorSuggestion]
     context_message: str
+    emergency_strategy: str = "Seguir el plan establecido."
 
 # --- Manual Search Models ---
 
