@@ -33,15 +33,51 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Glassmorphism Utility */
+/* Glassmorphism Utility with improved borders */
 .glass {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* Fluid Typography */
+.text-fluid-h1 {
+  font-size: clamp(1.5rem, 5vw, 3rem);
+  line-height: 1.1;
+}
+
+.text-fluid-h2 {
+  font-size: clamp(1.25rem, 4vw, 2.25rem);
+  line-height: 1.2;
+}
+
+/* Safe Areas for iOS */
+.safe-pt {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-pb {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* Liquid Spring Physics - Perspective */
 .liquid-perspective {
   perspective: 1000px;
+}
+
+/* Custom Scrollbar for Premium Feel */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }

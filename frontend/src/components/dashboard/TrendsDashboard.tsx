@@ -18,23 +18,23 @@ interface MetricCardProps {
 const MetricCard = ({ title, value, max, hideMax, unit, icon, color }: MetricCardProps) => (
   <motion.div
     whileHover={{ y: -5 }}
-    className="glass p-6 rounded-3xl flex flex-col gap-4 relative overflow-hidden"
+    className="glass p-5 sm:p-6 rounded-3xl flex flex-col gap-3 sm:gap-4 relative overflow-hidden"
   >
-    <div className={cn("p-3 w-fit rounded-2xl bg-opacity-10", color)}>
-      {icon}
+    <div className={cn("p-2.5 sm:p-3 w-fit rounded-2xl bg-opacity-10", color)}>
+      {React.cloneElement(icon as React.ReactElement, { size: 20 })}
     </div>
     <div>
-      <p className="text-zinc-500 text-sm font-bold uppercase tracking-wider">{title}</p>
-      <div className="flex items-baseline gap-1 mt-1">
-        <span className="text-3xl font-black text-white">
+      <p className="text-zinc-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider">{title}</p>
+      <div className="flex items-baseline gap-1 mt-0.5">
+        <span className="text-2xl sm:text-3xl font-black text-white">
           {Math.round(Number(value))}
-          {(max !== undefined && !hideMax) && <span className="text-xl text-white/30">/{Math.round(max)}</span>}
+          {(max !== undefined && !hideMax) && <span className="text-lg sm:text-xl text-white/30">/{Math.round(max)}</span>}
         </span>
-        {unit && <span className="text-zinc-500 text-xs font-bold uppercase">{unit}</span>}
+        {unit && <span className="text-zinc-600 text-[10px] font-bold uppercase">{unit}</span>}
       </div>
     </div>
     {/* Decorative blur */}
-    <div className={cn("absolute -bottom-4 -right-4 w-16 h-16 blur-2xl opacity-20 rounded-full", color.replace('text-', 'bg-'))} />
+    <div className={cn("absolute -bottom-4 -right-4 w-16 h-16 blur-2xl opacity-10 rounded-full", color.replace('text-', 'bg-'))} />
   </motion.div>
 );
 
@@ -67,8 +67,8 @@ interface TrendsDashboardProps {
 export default function TrendsDashboard({ metrics, trendImageUrl, history = [], onDelete }: TrendsDashboardProps) {
   return (
     <div className="w-full space-y-8 pb-12">
-      {/* Metrics Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      {/* Metrics Row - Fluid Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
         <MetricCard
           title="Proteína"
           value={metrics.protein}
@@ -120,8 +120,8 @@ export default function TrendsDashboard({ metrics, trendImageUrl, history = [], 
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <TrendingUp className="text-brand-teal" size={24} />
-            <h2 className="text-xl font-black italic tracking-tighter uppercase whitespace-nowrap">
+            <TrendingUp className="text-brand-teal shrink-0" size={24} />
+            <h2 className="text-fluid-h2 font-black italic tracking-tighter uppercase leading-none">
                ESTADO DE FLUJO (7 DÍAS)
             </h2>
           </div>

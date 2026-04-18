@@ -249,18 +249,18 @@ export default function PrimeStateApp() {
   }
 
   return (
-    <main className="relative min-h-screen px-6 pt-12 max-w-2xl mx-auto flex flex-col gap-12">
+    <main className="relative min-h-screen px-4 sm:px-6 safe-pt safe-pb max-w-2xl mx-auto flex flex-col gap-8 sm:gap-12">
       {/* Header */}
-      <header className="flex items-center justify-between">
+      <header className="flex items-center justify-between pt-6 sm:pt-12">
         <motion.div 
           initial={{ x: -20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 sm:gap-3"
         >
-          <div className="w-8 h-8 rounded-lg bg-brand-teal flex items-center justify-center">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-brand-teal flex items-center justify-center shadow-lg shadow-brand-teal/20">
             <Trophy size={18} className="text-black" />
           </div>
-          <span className="font-black italic tracking-tighter text-2xl uppercase">PRIME STATE</span>
+          <span className="text-fluid-h1 font-black italic tracking-tighter uppercase">PRIME STATE</span>
         </motion.div>
         
         <button 
