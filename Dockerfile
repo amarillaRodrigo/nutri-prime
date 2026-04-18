@@ -15,5 +15,5 @@ COPY . .
 EXPOSE 8000
 
 # Command to run the application
-# We use $PORT environment variable for Railway compatibility
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# For some reason, Railway likes the simple python call best when we have port logic in main.py
+CMD ["python", "main.py"]

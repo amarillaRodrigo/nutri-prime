@@ -14,27 +14,15 @@ from auth import get_current_user
 import uvicorn
 from datetime import date
 
-app = FastAPI(title="Prime State API - Phase 2", version="2.0.0")
 from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup logic
-    print("""
-    ================================================
-    PRIME STATE API - 2026 EDITION
-    ================================================
-    Status: ONLINE
-    Model: Gemini 2.0 Flash (Upgraded)
-    Dopamine Engine: ACTIVE
-    Analytics: READY
-    ================================================
-    """)
+    print("PRIME STATE API - ONLINE")
     yield
-    # Shutdown logic (optional)
-    pass
 
-app = FastAPI(title="Prime State API - Phase 2", version="2.0.0", lifespan=lifespan)
+app = FastAPI(title="Prime State API", version="2.0.0", lifespan=lifespan)
 
 # CORS setup
 app.add_middleware(
@@ -191,4 +179,4 @@ async def get_trends(
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
