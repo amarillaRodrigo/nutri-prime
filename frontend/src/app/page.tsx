@@ -10,7 +10,8 @@ import { useFoodScan } from "@/hooks/useFoodScan";
 import { Trophy, Settings } from "lucide-react";
 
 export default function PrimeStateApp() {
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://prime-state-api.loca.lt";
+  const rawApiBase = process.env.NEXT_PUBLIC_API_URL || "https://prime-state-api.loca.lt";
+  const API_BASE = rawApiBase.endsWith('/') ? rawApiBase.slice(0, -1) : rawApiBase;
   const { scanFood, isProcessing, lastAnalysis, reset } = useFoodScan(API_BASE);
   
   const [showDopamineRoom, setShowDopamineRoom] = useState(false);
