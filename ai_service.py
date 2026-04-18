@@ -48,7 +48,7 @@ REGLAS DE INFERENCIA (Chain-of-Thought):
 class VisionInferenceService:
     def __init__(self):
         # Fallback list for higher resilience
-        self.model_ids = ["gemini-1.5-flash-002", "gemini-2.0-flash", "gemini-1.5-flash"]
+        self.model_ids = ["gemini-1.5-flash-002", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-flash-8b"]
 
     async def analyze_food_image(self, image_bytes: bytes, mime_type: str = "image/jpeg") -> FoodAnalysisResult:
         last_err = None
@@ -76,13 +76,9 @@ class VisionInferenceService:
             except Exception as e:
                 last_err = e
                 err_msg = str(e)
-                if "404" in err_msg:
-                    print(f"Vision Model {model_id} not found, trying next...")
-                    continue
-                if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg:
-                    print(f"Vision Model {model_id} quota hit, trying next...")
-                    continue
-                break
+                print(f"[CEREBRO-FAIL] Vision Model {model_id} failed: {err_msg}")
+                # Try next model on any error
+                continue
         
         # Final Error handling
         err_msg = str(last_err)

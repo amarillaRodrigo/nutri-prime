@@ -24,6 +24,11 @@ from contextlib import asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup logic
     print("PRIME STATE API - ONLINE")
+    try:
+        models = client.models.list()
+        print(f"[CEREBRO-DEBUG] Modelos disponibles: {[m.name for m in models]}")
+    except Exception as e:
+        print(f"[CEREBRO-DEBUG] No se pudo listar modelos: {str(e)}")
     yield
 
 app = FastAPI(title="Prime State API", version="2.0.0", lifespan=lifespan)

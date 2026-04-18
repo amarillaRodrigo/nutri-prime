@@ -35,7 +35,7 @@ REGLAS:
 class AdvisorService:
     def __init__(self):
         # Fallback list for higher resilience
-        self.model_ids = ["gemini-1.5-flash-002", "gemini-2.0-flash", "gemini-1.5-flash"]
+        self.model_ids = ["gemini-1.5-flash-002", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-flash-8b"]
 
     async def get_recommendations(self, request: AdvisorRequest) -> AdvisorResponse:
         last_err = None
@@ -68,13 +68,9 @@ class AdvisorService:
             except Exception as e:
                 last_err = e
                 err_msg = str(e)
-                if "404" in err_msg:
-                    print(f"Advisor Model {model_id} not found, trying next...")
-                    continue
-                if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg:
-                    print(f"Advisor Model {model_id} quota hit, trying next...")
-                    continue
-                break
+                print(f"[CEREBRO-FAIL] Advisor Model {model_id} failed: {err_msg}")
+                # Try next on any error
+                continue
         
         # Final Error handling
         err_msg = str(last_err)

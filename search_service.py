@@ -27,8 +27,8 @@ REGLAS:
 
 class SearchService:
     def __init__(self):
-        # Trying a more specific version to avoid 404s
-        self.model_ids = ["gemini-1.5-flash-002", "gemini-2.0-flash", "gemini-1.5-flash"]
+        # Expanded list for discovery
+        self.model_ids = ["gemini-1.5-flash-002", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-flash-8b"]
 
     async def search_food(self, query: str) -> ManualSearchResponse:
         last_err = None
@@ -53,13 +53,9 @@ class SearchService:
             except Exception as e:
                 last_err = e
                 err_msg = str(e)
-                if "404" in err_msg:
-                    print(f"Model {model_id} not found, trying next...")
-                    continue
-                if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg:
-                    print(f"Model {model_id} quota hit, trying next...")
-                    continue
-                break # Other errors shouldn't be retried with different models
+                print(f"[CEREBRO-FAIL] Model {model_id} failed: {err_msg}")
+                # We continue on any error to see if other models work
+                continue
         
         # If we get here, all models failed
         err_msg = str(last_err)
