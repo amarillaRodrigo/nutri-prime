@@ -10,6 +10,7 @@ import { useFoodScan } from "@/hooks/useFoodScan";
 import { Trophy, Settings } from "lucide-react";
 import { sanitizeApiUrl } from "@/lib/utils";
 import AdvisorMenu from "@/components/advisor/AdvisorMenu";
+import PortionScaleModal from "@/components/intervention/PortionScaleModal";
 
 const LiveClock = () => {
   const [time, setTime] = useState<Date | null>(null);
@@ -53,6 +54,7 @@ export default function PrimeStateApp() {
   const [scanHistory, setScanHistory] = useState<any[]>([]);
   const [todayTotals, setTodayTotals] = useState<any>(null);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [showPortionModal, setShowPortionModal] = useState(false);
 
   // For testing: Hardcoded token
   const TEST_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpemtsaG5jZm1rYXpwb3BqemF3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjQ4MDE1NywiZXhwIjoyMDkyMDU2MTU3fQ._nQQ_z2NG7_Kfvrjm6D1stqLR3VTuje4KvWvd5WlK3A";
@@ -170,6 +172,24 @@ export default function PrimeStateApp() {
     }
   };
 
+  const handleScaleEntry = async (multiplier: number) => {
+    if (!lastAnalysis?.entry_id) return;
+    try {
+        await fetch(`${API_BASE}/history/${lastAnalysis.entry_id}/scale`, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${TEST_TOKEN}` 
+            },
+            body: JSON.stringify({ multiplier })
+        });
+        setShowPortionModal(false);
+        fetchHistory();
+    } catch (e) {
+        console.error("Scaling error", e);
+    }
+  };
+
   const handleCapture = async (blob: Blob) => {
     // Ensure profile exists on backend before uploading image
     const profileReady = await ensureProfileSynced();
@@ -188,12 +208,16 @@ export default function PrimeStateApp() {
     }
 
     if (result) {
-        fetchHistory(); // Refresh history after scan
-    }
-    if (result?.motivation_mode_active) {
-      setShowDopamineRoom(true);
+        if (result.motivation_mode_active) {
+            setShowDopamineRoom(true);
+        } else if (result.is_packaged) {
+            setShowPortionModal(true);
+        } else {
+            fetchHistory(); // Normal refresh
+        }
     }
   };
+
 
   const handleProfileSync = (profile: any) => {
     setUserProfile(profile);
@@ -303,10 +327,23 @@ export default function PrimeStateApp() {
                 if (lastAnalysis?.entry_id) {
                     handleDeleteEntry(lastAnalysis.entry_id);
                 }
+            } else {
+                // Flow: After Dopamine, if it was packaged, show scale modal
+                if (lastAnalysis?.is_packaged) {
+                    setShowPortionModal(true);
+                } else {
+                    fetchHistory();
+                }
             }
         }}
         assetUrl={lastAnalysis?.asset_url}
         message={lastAnalysis?.message}
+      />
+
+      <PortionScaleModal 
+        isOpen={showPortionModal}
+        unitName={lastAnalysis?.unit_name || "unidad"}
+        onConfirm={handleScaleEntry}
       />
 
       <footer className="pb-8 text-center mt-auto">

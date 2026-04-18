@@ -31,6 +31,8 @@ class FoodItem(BaseModel):
 class FoodAnalysisResult(BaseModel):
     """Schema for Gemini output via JSON mode."""
     alimento: str
+    is_packaged: bool = Field(description="True si el alimento viene en envase, lata, botella o es una unidad comercial definida")
+    unit_name: str = Field(description="Nombre de la unidad base (ej: 'paquete', 'lata', 'unidad', 'rebanada', 'alfajor')")
     cantidad_estimada_gramos: int
     proteina: float
     carbohidratos: float
@@ -48,6 +50,8 @@ class UploadResponse(BaseModel):
     calories_remaining: float
     message: Optional[str] = None
     entry_id: Optional[str] = None
+    is_packaged: bool = False
+    unit_name: Optional[str] = None
 
 # --- Advisor Models ---
 

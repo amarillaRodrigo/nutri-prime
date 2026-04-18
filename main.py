@@ -165,7 +165,9 @@ async def upload_image(
             motivation_mode_active=trigger_intervention,
             calories_remaining=calories_remaining,
             message=analysis.justificacion or intervention_data["message"] or "Registro guardado.",
-            entry_id=entry_id
+            entry_id=entry_id,
+            is_packaged=analysis.is_packaged,
+            unit_name=analysis.unit_name
         )
 
     except Exception as e:
@@ -239,6 +241,21 @@ async def recommend_food(
     try:
         recommendations = await advisor_service.get_recommendations(request)
         return recommendations
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+class ScaleRequest(BaseModel):
+    multiplier: float
+
+@app.post("/history/{entry_id}/scale")
+async def scale_history_entry(
+    entry_id: str,
+    request: ScaleRequest,
+    user_id: str = Depends(get_current_user)
+):
+    try:
+        await DBService.scale_food_entry(entry_id, user_id, request.multiplier)
+        return {"message": "Entry scaled"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

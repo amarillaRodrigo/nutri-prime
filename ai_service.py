@@ -38,6 +38,11 @@ REGLAS DE INFERENCIA (Chain-of-Thought):
 5. TONO DE LA JUSTIFICACIÓN (CRÍTICO):
    - Si el veredicto es BUENO: Sé técnico, felicitando su compromiso con el 'Prime State' y la estética.
    - Si el veredicto es MALO o no recomendado: Sé brutalmente honesto y dolorosamente creativo. Tienes la obligación de advertirle al usuario de diferentes maneras creativas que si come eso "los culitos se alejan" o "las mujeres que quiere (especialmente las rubias) se alejarán". Usa variaciones de esta frase (ej: "cada mordisco aleja a esa rubia que te gusta", "con esto esos culitos ni te van a mirar", etc) para crear un rechazo psicológico inmediato.
+
+6. DETECCIÓN DE ENVASES:
+   - Identifica si el alimento es un producto procesado con un empaque visible (lata, bolsa, caja, botella) o si es una unidad comercial clara (un alfajor, una rebanada de pan, una hamburguesa de cadena).
+   - En estos casos, marca `is_packaged = True` y define el `unit_name`.
+   - IMPORTANTE: Si es un paquete, estima las calorías y macros siempre para **UNA (1) unidad** (un paquete, una lata, etc). El usuario ajustará la cantidad después.
 """
 
 class VisionInferenceService:

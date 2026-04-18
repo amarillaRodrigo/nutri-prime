@@ -55,6 +55,26 @@ class DBService:
         return DBService._db.table("food_entries").delete().eq("id", entry_id).eq("user_id", user_id).execute()
 
     @staticmethod
+    async def scale_food_entry(entry_id: str, user_id: str, multiplier: float):
+        if not DBService._db: return None
+        # Get existing entry
+        response = DBService._db.table("food_entries").select("*").eq("id", entry_id).eq("user_id", user_id).execute()
+        if not response.data: return None
+        
+        entry = response.data[0]
+        new_calories = round(entry["calories"] * multiplier)
+        macros = entry.get("macros", {})
+        if macros:
+            macros["protein"] = round(macros.get("protein", 0) * multiplier, 1)
+            macros["carbs"] = round(macros.get("carbs", 0) * multiplier, 1)
+            macros["fat"] = round(macros.get("fat", 0) * multiplier, 1)
+            
+        return DBService._db.table("food_entries").update({
+            "calories": new_calories,
+            "macros": macros
+        }).eq("id", entry_id).eq("user_id", user_id).execute()
+
+    @staticmethod
     async def get_daily_log(user_id: str, date_str: str):
         if not DBService._db: return None
         response = DBService._db.table("daily_logs").select("*").eq("user_id", user_id).eq("date", date_str).execute()
