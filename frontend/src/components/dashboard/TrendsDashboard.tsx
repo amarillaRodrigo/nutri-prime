@@ -14,7 +14,7 @@ interface MetricCardProps {
   color: string;
 }
 
-const MetricCard = ({ title, value, unit, icon, color }: MetricCardProps) => (
+const MetricCard = ({ title, value, max, unit, icon, color }: MetricCardProps) => (
   <motion.div
     whileHover={{ y: -5 }}
     className="glass p-6 rounded-3xl flex flex-col gap-4 relative overflow-hidden"
