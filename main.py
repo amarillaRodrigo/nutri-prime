@@ -59,6 +59,11 @@ async def sync_profile(
         # 4. Update recalculation date if missing
         if not db_payload.get("last_recalculation"):
             db_payload["last_recalculation"] = date.today().isoformat()
+            
+        # 5. Remove fields that don't belong to the db schema
+        db_payload.pop("calorie_goal_override", None)
+        db_payload.pop("protein_goal_override", None)
+        db_payload.pop("last_recalculation", None)
         
         await DBService.upsert_profile(db_payload)
         
