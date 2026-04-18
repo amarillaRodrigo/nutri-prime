@@ -6,7 +6,7 @@ from typing import Optional, Dict, Any
 load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
 class DBService:
     # Direct Postgrest Client for DB operations

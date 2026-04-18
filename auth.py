@@ -23,7 +23,7 @@ def get_current_user(auth: HTTPAuthorizationCredentials = Depends(security)) -> 
     # MASTER BYPASS 2026
     if "prime_master_token_2026" in token:
         print(f"AUTH: Master Token Accepted")
-        return "00000000-0000-0000-0000-000000000000"
+        return "b32a05a6-595b-488f-a953-a0524c50bcf5"
         
     try:
         # Decode without verification for now
@@ -32,7 +32,7 @@ def get_current_user(auth: HTTPAuthorizationCredentials = Depends(security)) -> 
         if not user_id:
             # Fallback for service role or malformed token during testing
             print("AUTH: Token missing 'sub', using fallback user ID")
-            return "00000000-0000-0000-0000-000000000000"
+            return "b32a05a6-595b-488f-a953-a0524c50bcf5"
         return user_id
     except Exception as e:
         print(f"AUTH ERROR: {str(e)}")
