@@ -101,13 +101,19 @@ class DBService:
         # To be even more precise, we only count entries where the local date matches.
         # For now, we'll sum everything in the recent window.
         for entry in response.data:
-            totals["calories"] += entry.get("calories", 0)
-            macros = entry.get("macros", {})
-            if macros:
-                totals["protein"] += macros.get("protein", 0)
-                totals["carbs"] += macros.get("carbs", 0)
-                # Sync 'fat' and 'fats' keys
-                totals["fats"] += macros.get("fat", macros.get("fats", 0))
+            # Defensive summing: handle cases where fields might be strings or None
+            try:
+                cals = entry.get("calories") or 0
+                totals["calories"] += int(float(cals))
+                
+                macros = entry.get("macros", {})
+                if macros:
+                    totals["protein"] += float(macros.get("protein") or 0)
+                    totals["carbs"] += float(macros.get("carbs") or 0)
+                    # Sync 'fat' and 'fats' keys
+                    totals["fats"] += float(macros.get("fat") or macros.get("fats") or 0)
+            except (ValueError, TypeError) as e:
+                print(f"[DB-SUM-ERROR] Failed to sum entry {entry.get('id')}: {str(e)}")
                 
         return totals
 

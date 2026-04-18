@@ -323,7 +323,15 @@ export default function PrimeStateApp() {
             protein: todayTotals?.protein || 0,
             carbs: todayTotals?.carbs || 0,
             fats: todayTotals?.fats || 0,
-            caloriesRemaining: userProfile?.calorie_goal ? Math.max(0, userProfile.calorie_goal - (todayTotals?.calories || 0)) : (lastAnalysis?.calories_remaining || 2000),
+            caloriesRemaining: (() => {
+              const goal = userProfile?.calorie_goal || 2000;
+              let consumed = todayTotals?.calories || 0;
+              // Fail-safe: If calories are zero but macros aren't, calculate from macros
+              if (consumed === 0 && (todayTotals?.protein || todayTotals?.carbs)) {
+                consumed = (todayTotals.protein * 4) + (todayTotals.carbs * 4) + ((todayTotals.fats || 0) * 9);
+              }
+              return Math.max(0, goal - consumed);
+            })(),
             willpowerScore: lastAnalysis?.analysis?.calidad_nutricional || 0,
             calorieGoal: userProfile?.calorie_goal || 2000,
             proteinGoal: userProfile?.protein_goal || 160,
