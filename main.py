@@ -4,15 +4,16 @@ import json
 from pydantic import BaseModel
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from models import UploadResponse, UserProfile, FoodAnalysisResult, ProfileSyncResponse, AdvisorRequest
 from ai_service import VisionInferenceService
 from advisor_service import AdvisorService
+from search_service import SearchService
 from logic_service import calculate_tmb, evaluate_intervention, suggest_goals
 from fastapi.responses import StreamingResponse
 from analytics_service import AnalyticsService
 from dopamine_engine import DopamineInterventionEngine
 from db_service import DBService
 from auth import get_current_user
+from models import UploadResponse, UserProfile, FoodAnalysisResult, ProfileSyncResponse, AdvisorRequest, ManualSearchResponse, ManualLogRequest, ManualSearchResult
 
 import uvicorn
 from datetime import date
@@ -33,6 +34,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["https://nutri-prime.vercel.ap
 # Initialize services
 vision_service = VisionInferenceService()
 advisor_service = AdvisorService()
+search_service = SearchService()
 dopamine_engine = DopamineInterventionEngine()
 analytics_service = AnalyticsService()
 
@@ -257,6 +259,65 @@ async def scale_history_entry(
     try:
         await DBService.scale_food_entry(entry_id, user_id, request.multiplier)
         return {"message": "Entry scaled"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/search-food")
+async def search_food(
+    q: str,
+    user_id: str = Depends(get_current_user)
+):
+    """
+    Finds food nutritional info from a text query.
+    """
+    try:
+        results = await search_service.search_food(q)
+        return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/log-manual")
+async def log_manual_food(
+    request: ManualLogRequest,
+    user_id: str = Depends(get_current_user)
+):
+    """
+    Saves a manual food entry with final calculated macros.
+    """
+    try:
+        # Construct the entry data for DBService.create_food_entry
+        # Note: We align the structure with how DB expects it (from main.py logic)
+        entry_data = {
+            "user_id": user_id,
+            "food_name": f"{request.nombre} ({request.grams}g)",
+            "calories": int(request.calories),
+            "macros": {
+                "protein": request.protein,
+                "carbs": request.carbs,
+                "fat": request.fat
+            },
+            "metadata": {
+                "veredicto": request.veredicto,
+                "justificacion": request.justificacion,
+                "is_manual": True,
+                "grams": request.grams
+            }
+        }
+        
+        db_res = await DBService.create_food_entry(entry_data)
+        
+        # Recalculate remaining calories (simplified for this endpoint)
+        profile = await DBService.get_profile(user_id)
+        goal = profile.get("calorie_goal", 2000)
+        today_totals = await DBService.get_today_totals(user_id)
+        remaining = max(0, goal - today_totals["calories"])
+        
+        return {
+            "message": "Registro manual guardado con éxito.",
+            "calories_remaining": remaining,
+            "entry_id": db_res.data[0]["id"] if db_res.data else None
+        }
+        
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

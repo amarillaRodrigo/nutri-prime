@@ -11,6 +11,7 @@ import { Trophy, Settings } from "lucide-react";
 import { sanitizeApiUrl } from "@/lib/utils";
 import AdvisorMenu from "@/components/advisor/AdvisorMenu";
 import PortionScaleModal from "@/components/intervention/PortionScaleModal";
+import ManualSearch from "@/components/capture/ManualSearch";
 
 const LiveClock = () => {
   const [time, setTime] = useState<Date | null>(null);
@@ -270,11 +271,24 @@ export default function PrimeStateApp() {
       )}
 
       {/* Main Experience */}
-      <section className="flex-1 flex flex-col justify-center">
+      <section className="flex-1 flex flex-col justify-center gap-12">
         <FlashCapture 
           onCapture={handleCapture}
           isProcessing={isProcessing} 
         />
+        
+        <div className="space-y-4">
+            <div className="flex items-center gap-4 px-2">
+                <div className="h-px flex-1 bg-white/5" />
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-700">O BUSCA MANUALMENTE</span>
+                <div className="h-px flex-1 bg-white/5" />
+            </div>
+            <ManualSearch 
+                apiBaseUrl={API_BASE}
+                authToken={TEST_TOKEN}
+                onSuccess={() => fetchHistory()}
+            />
+        </div>
       </section>
 
       {/* Dashboard View */}

@@ -77,3 +77,25 @@ class AdvisorRequest(BaseModel):
 class AdvisorResponse(BaseModel):
     suggestions: List[AdvisorSuggestion]
     context_message: str
+
+# --- Manual Search Models ---
+
+class ManualSearchResult(BaseModel):
+    nombre: str
+    macros_per_100g: MealMacros
+    veredicto: str = Field(..., pattern="^(BUENO|MALO|MODERADO)$")
+    justificacion_breve: str
+
+class ManualSearchResponse(BaseModel):
+    results: List[ManualSearchResult]
+    message: str
+
+class ManualLogRequest(BaseModel):
+    nombre: str
+    calories: float
+    protein: float
+    carbs: float
+    fat: float
+    grams: int
+    veredicto: str
+    justificacion: str
