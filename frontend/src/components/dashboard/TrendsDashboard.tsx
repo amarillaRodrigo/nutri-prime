@@ -9,12 +9,13 @@ interface MetricCardProps {
   title: string;
   value: string | number;
   max?: number;
+  hideMax?: boolean;
   unit?: string;
   icon: React.ReactNode;
   color: string;
 }
 
-const MetricCard = ({ title, value, max, unit, icon, color }: MetricCardProps) => (
+const MetricCard = ({ title, value, max, hideMax, unit, icon, color }: MetricCardProps) => (
   <motion.div
     whileHover={{ y: -5 }}
     className="glass p-6 rounded-3xl flex flex-col gap-4 relative overflow-hidden"
@@ -27,7 +28,7 @@ const MetricCard = ({ title, value, max, unit, icon, color }: MetricCardProps) =
       <div className="flex items-baseline gap-1 mt-1">
         <span className="text-3xl font-black text-white">
           {Math.round(Number(value))}
-          {max !== undefined && <span className="text-xl text-white/30">/{Math.round(max)}</span>}
+          {(max !== undefined && !hideMax) && <span className="text-xl text-white/30">/{Math.round(max)}</span>}
         </span>
         {unit && <span className="text-zinc-500 text-xs font-bold uppercase">{unit}</span>}
       </div>
@@ -93,10 +94,11 @@ export default function TrendsDashboard({ metrics, trendImageUrl, history = [], 
           color="text-yellow-200"
         />
         <MetricCard
-          title="Restante"
+          title="Calorías"
           value={metrics.caloriesRemaining}
           max={metrics.calorieGoal}
-          unit="kcal"
+          hideMax={true}
+          unit="restantes"
           icon={<Flame size={24} className="text-orange-500" />}
           color="text-orange-500"
         />
