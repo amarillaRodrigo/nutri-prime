@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { sanitizeApiUrl } from "@/lib/utils";
 
 export type FoodAnalysis = {
   alimento: string;
@@ -25,6 +26,8 @@ export function useFoodScan(apiBaseUrl: string = process.env.NEXT_PUBLIC_API_URL
   const [lastAnalysis, setLastAnalysis] = useState<ScanResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const cleanBase = sanitizeApiUrl(apiBaseUrl);
+
   const scanFood = async (imageBlob: Blob, token: string) => {
     setIsProcessing(true);
     setError(null);
@@ -36,7 +39,7 @@ export function useFoodScan(apiBaseUrl: string = process.env.NEXT_PUBLIC_API_URL
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout for AI
 
-      const response = await fetch(`${apiBaseUrl}/upload-image`, {
+      const response = await fetch(`${cleanBase}/upload-image`, {
         method: "POST",
         body: formData,
         headers: {

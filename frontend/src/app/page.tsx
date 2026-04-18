@@ -8,14 +8,16 @@ import TrendsDashboard from "@/components/dashboard/TrendsDashboard";
 import ProfileSetup from "@/components/profile/ProfileSetup";
 import { useFoodScan } from "@/hooks/useFoodScan";
 import { Trophy, Settings } from "lucide-react";
+import { sanitizeApiUrl } from "@/lib/utils";
 
 export default function PrimeStateApp() {
-    const rawApiBase = process.env.NEXT_PUBLIC_API_URL || "https://prime-state-api.loca.lt";
-    let API_BASE = rawApiBase.trim();
-    if (API_BASE && !API_BASE.startsWith('http')) {
-        API_BASE = `https://${API_BASE}`;
-    }
-    API_BASE = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
+    const API_BASE = sanitizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
+    
+    // Debug logging for production deployment
+    useEffect(() => {
+        console.log("%c[PRIME-DEBUG] API Base URL:", "color: #00d1b2; font-weight: bold;", API_BASE);
+    }, [API_BASE]);
+
   const { scanFood, isProcessing, lastAnalysis, reset } = useFoodScan(API_BASE);
   
   const [showDopamineRoom, setShowDopamineRoom] = useState(false);

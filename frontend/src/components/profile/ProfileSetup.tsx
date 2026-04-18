@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, Activity, Gauge, Target, ChevronRight, Save, Sparkles } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, sanitizeApiUrl } from "@/lib/utils";
 
 interface ProfileSetupProps {
   isOpen: boolean;
@@ -70,12 +70,9 @@ export default function ProfileSetup({ isOpen, onSync, apiBaseUrl, authToken }: 
     setIsSyncing(true);
     setErrorStatus(null);
     try {
-      let cleanBase = apiBaseUrl.trim();
-      if (cleanBase && !cleanBase.startsWith('http')) {
-          cleanBase = `https://${cleanBase}`;
-      }
-      cleanBase = cleanBase.endsWith('/') ? cleanBase.slice(0, -1) : cleanBase;
-      const response = await fetch(`${cleanBase}/sync-profile`, {
+      const cleanBase = sanitizeApiUrl(apiBaseUrl);
+      const targetUrl = `${cleanBase}/sync-profile`;
+      const response = await fetch(targetUrl, {
         method: "POST",
         headers: { 
             "Content-Type": "application/json",
@@ -84,7 +81,7 @@ export default function ProfileSetup({ isOpen, onSync, apiBaseUrl, authToken }: 
         body: JSON.stringify(formData),
       });
       
-      if (!response.ok) throw new Error(`Error ${response.status}: Revisa la conexión con el Cerebro.`);
+      if (!response.ok) throw new Error(`Error ${response.status}: Ruta -> ${targetUrl}`);
       
       const data = await response.json();
       onSync(data.profile);
