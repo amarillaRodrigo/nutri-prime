@@ -34,21 +34,6 @@ REGLAS DE INFERENCIA (Chain-of-Thought):
    - BUENO: Alimentos densos, naturales, alta proteína.
    - MODERADO: Comidas balanceadas pero con algún procesado o exceso de grasa.
    - MALO: Ultraprocesados, azúcares refinados, calorías vacías.
-
-SALIDA:
-Debes responder ESTRICTAMENTE con un JSON válido:
-{
-  "alimento": str,
-  "cantidad_estimada_gramos": int,
-  "proteina": float,
-  "carbohidratos": float,
-  "grasas": float,
-  "calidad_nutricional": int (1-10),
-  "veredicto": "BUENO" | "MALO" | "MODERADO",
-  "justificacion": str (breve, técnica y motivadora),
-  "food_items": [{"nombre": str, "porcion_estimada": str}],
-  "total_estimated_calories": int
-}
 """
 
 class VisionInferenceService:
@@ -70,6 +55,7 @@ class VisionInferenceService:
                 config=types.GenerateContentConfig(
                     system_instruction=SYSTEM_PROMPT,
                     response_mime_type="application/json",
+                    response_schema=FoodAnalysisResult,
                     max_output_tokens=1000,
                 )
             )
