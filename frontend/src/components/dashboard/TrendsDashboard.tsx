@@ -38,6 +38,7 @@ interface TrendsDashboardProps {
     protein: number;
     caloriesRemaining: number;
     willpowerScore: number;
+    proteinGoal?: number;
   };
   trendImageUrl?: string;
 }
