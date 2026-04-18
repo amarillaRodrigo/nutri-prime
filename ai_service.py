@@ -1,5 +1,6 @@
 import os
 import json
+import re
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
@@ -76,7 +77,19 @@ class VisionInferenceService:
             if not response.text:
                 raise ValueError("Gemini returned empty response.")
                 
-            analysis_dict = json.loads(response.text)
+            raw_text = response.text
+            # Clean markdown code blocks if Gemini returns them despite application/json
+            match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', raw_text)
+            if match:
+                raw_text = match.group(1)
+            else:
+                start_idx = raw_text.find('{')
+                end_idx = raw_text.rfind('}')
+                if start_idx != -1 and end_idx != -1:
+                    raw_text = raw_text[start_idx:end_idx+1]
+            
+            raw_text = raw_text.strip()
+            analysis_dict = json.loads(raw_text)
             
             # Pydantic validation (Zero Trust)
             return FoodAnalysisResult(**analysis_dict)
