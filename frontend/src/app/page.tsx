@@ -261,7 +261,10 @@ export default function PrimeStateApp() {
             fats: todayTotals?.fats || 0,
             caloriesRemaining: userProfile?.calorie_goal ? Math.max(0, userProfile.calorie_goal - (todayTotals?.calories || 0)) : (lastAnalysis?.calories_remaining || 2000),
             willpowerScore: lastAnalysis?.analysis?.calidad_nutricional || 0,
-            proteinGoal: userProfile?.protein_goal || 160
+            calorieGoal: userProfile?.calorie_goal || 2000,
+            proteinGoal: userProfile?.protein_goal || 160,
+            fatsGoal: ((userProfile?.calorie_goal || 2000) * 0.25) / 9,
+            carbsGoal: ((userProfile?.calorie_goal || 2000) - ((userProfile?.protein_goal || 160) * 4) - (((userProfile?.calorie_goal || 2000) * 0.25))) / 4
           }}
           trendImageUrl={`${API_BASE}/analytics/trends`} 
           history={scanHistory}

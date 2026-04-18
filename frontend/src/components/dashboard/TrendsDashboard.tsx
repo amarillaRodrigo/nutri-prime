@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 interface MetricCardProps {
   title: string;
   value: string | number;
+  max?: number;
   unit?: string;
   icon: React.ReactNode;
   color: string;
@@ -24,7 +25,10 @@ const MetricCard = ({ title, value, unit, icon, color }: MetricCardProps) => (
     <div>
       <p className="text-zinc-500 text-sm font-bold uppercase tracking-wider">{title}</p>
       <div className="flex items-baseline gap-1 mt-1">
-        <span className="text-3xl font-black text-white">{value}</span>
+        <span className="text-3xl font-black text-white">
+          {Math.round(Number(value))}
+          {max !== undefined && <span className="text-xl text-white/30">/{Math.round(max)}</span>}
+        </span>
         {unit && <span className="text-zinc-500 text-xs font-bold uppercase">{unit}</span>}
       </div>
     </div>
@@ -49,7 +53,10 @@ interface TrendsDashboardProps {
     fats?: number;
     caloriesRemaining: number;
     willpowerScore: number;
+    calorieGoal?: number;
     proteinGoal?: number;
+    carbsGoal?: number;
+    fatsGoal?: number;
   };
   trendImageUrl?: string;
   history?: HistoryEntry[];
@@ -64,6 +71,7 @@ export default function TrendsDashboard({ metrics, trendImageUrl, history = [], 
         <MetricCard
           title="Proteína"
           value={metrics.protein}
+          max={metrics.proteinGoal}
           unit="g"
           icon={<Zap size={24} className="text-brand-teal" />}
           color="text-brand-teal"
@@ -71,6 +79,7 @@ export default function TrendsDashboard({ metrics, trendImageUrl, history = [], 
         <MetricCard
           title="Carbos"
           value={metrics.carbs || 0}
+          max={metrics.carbsGoal}
           unit="g"
           icon={<Wheat size={24} className="text-amber-400" />}
           color="text-amber-400"
@@ -78,6 +87,7 @@ export default function TrendsDashboard({ metrics, trendImageUrl, history = [], 
         <MetricCard
           title="Grasas"
           value={metrics.fats || 0}
+          max={metrics.fatsGoal}
           unit="g"
           icon={<Droplet size={24} className="text-yellow-200" />}
           color="text-yellow-200"
@@ -85,6 +95,7 @@ export default function TrendsDashboard({ metrics, trendImageUrl, history = [], 
         <MetricCard
           title="Restante"
           value={metrics.caloriesRemaining}
+          max={metrics.calorieGoal}
           unit="kcal"
           icon={<Flame size={24} className="text-orange-500" />}
           color="text-orange-500"
@@ -92,6 +103,7 @@ export default function TrendsDashboard({ metrics, trendImageUrl, history = [], 
         <MetricCard
           title="Voluntad"
           value={metrics.willpowerScore}
+          max={10}
           unit="pts"
           icon={<Trophy size={24} className="text-yellow-500" />}
           color="text-yellow-500"
