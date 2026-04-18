@@ -11,12 +11,13 @@ interface StrategyAdvisorProps {
   metrics: {
     caloriesRemaining: number;
     protein: number;
-    carbs: number;
-    fats: number;
-    calorieGoal: number;
-    proteinGoal: number;
-    carbsGoal: number;
-    fatsGoal: number;
+    carbs?: number;
+    fats?: number;
+    willpowerScore?: number;
+    calorieGoal?: number;
+    proteinGoal?: number;
+    carbsGoal?: number;
+    fatsGoal?: number;
   };
 }
 
@@ -35,13 +36,13 @@ export default function StrategyAdvisor({ apiBaseUrl, authToken, metrics }: Stra
       const payload = {
         available_food: "", // Optional, could be added to UI
         calories_left: metrics.caloriesRemaining,
-        protein_left: Math.max(0, metrics.proteinGoal - metrics.protein),
-        carbs_left: Math.max(0, metrics.carbsGoal - metrics.carbs),
-        fat_left: Math.max(0, metrics.fatsGoal - metrics.fats),
-        calories_consumed: metrics.calorieGoal - metrics.caloriesRemaining,
+        protein_left: Math.max(0, (metrics.proteinGoal || 160) - metrics.protein),
+        carbs_left: Math.max(0, (metrics.carbsGoal || 215) - (metrics.carbs || 0)),
+        fat_left: Math.max(0, (metrics.fatsGoal || 60) - (metrics.fats || 0)),
+        calories_consumed: (metrics.calorieGoal || 2000) - metrics.caloriesRemaining,
         protein_consumed: metrics.protein,
-        carbs_consumed: metrics.carbs,
-        fat_consumed: metrics.fats,
+        carbs_consumed: metrics.carbs || 0,
+        fat_consumed: metrics.fats || 0,
         is_party_mode: isPartyMode
       };
 
