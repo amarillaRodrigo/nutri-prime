@@ -38,7 +38,7 @@ export function useFoodScan(apiBaseUrl: string = process.env.NEXT_PUBLIC_API_URL
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout for AI
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout for AI moves and mobile data
 
       const response = await fetch(`${cleanBase}/upload-image`, {
         method: "POST",

@@ -52,6 +52,9 @@ export default function AdvisorMenu({ remainingMacros, apiBaseUrl, authToken }: 
     setIsAsking(true);
     setRecommendations(null);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout for complex AI advice
+
     try {
       const response = await fetch(`${apiBaseUrl}/advisor/recommend`, {
         method: "POST",
@@ -65,15 +68,22 @@ export default function AdvisorMenu({ remainingMacros, apiBaseUrl, authToken }: 
           protein_left: remainingMacros.protein,
           carbs_left: remainingMacros.carbs,
           fat_left: remainingMacros.fats
-        })
+        }),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
         setRecommendations(data);
       }
-    } catch (e) {
-      console.error("Advisor Error:", e);
+    } catch (e: any) {
+      if (e.name === 'AbortError') {
+        console.error("Advisor Timeout");
+      } else {
+        console.error("Advisor Error:", e);
+      }
     } finally {
       setIsAsking(false);
     }
