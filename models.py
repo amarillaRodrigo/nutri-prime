@@ -48,3 +48,28 @@ class UploadResponse(BaseModel):
     calories_remaining: float
     message: Optional[str] = None
     entry_id: Optional[str] = None
+
+# --- Advisor Models ---
+
+class MealMacros(BaseModel):
+    proteina: float
+    carbohidratos: float
+    grasas: float
+    calorias: float
+
+class AdvisorSuggestion(BaseModel):
+    nombre: str
+    descripcion: str
+    macros: MealMacros
+    justificacion: str
+
+class AdvisorRequest(BaseModel):
+    available_food: str
+    calories_left: float
+    protein_left: float
+    carbs_left: float
+    fat_left: float
+
+class AdvisorResponse(BaseModel):
+    suggestions: List[AdvisorSuggestion]
+    context_message: str

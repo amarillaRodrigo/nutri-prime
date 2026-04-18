@@ -5,12 +5,14 @@ from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from models import UploadResponse, UserProfile, FoodAnalysisResult, ProfileSyncResponse
 from ai_service import VisionInferenceService
+from advisor_service import AdvisorService
 from logic_service import calculate_tmb, evaluate_intervention, suggest_goals
 from fastapi.responses import StreamingResponse
 from analytics_service import AnalyticsService
 from dopamine_engine import DopamineInterventionEngine
 from db_service import DBService
 from auth import get_current_user
+from models import UploadResponse, UserProfile, FoodAnalysisResult, ProfileSyncResponse, AdvisorRequest
 import uvicorn
 from datetime import date
 
@@ -29,6 +31,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["https://nutri-prime.vercel.ap
 
 # Initialize services
 vision_service = VisionInferenceService()
+advisor_service = AdvisorService()
 dopamine_engine = DopamineInterventionEngine()
 analytics_service = AnalyticsService()
 
@@ -222,6 +225,20 @@ async def delete_history_entry(
     try:
         await DBService.delete_food_entry(entry_id, user_id)
         return {"message": "Entry deleted"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/advisor/recommend")
+async def recommend_food(
+    request: AdvisorRequest,
+    user_id: str = Depends(get_current_user)
+):
+    """
+    Suggests meals based on available food and remaining macros.
+    """
+    try:
+        recommendations = await advisor_service.get_recommendations(request)
+        return recommendations
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

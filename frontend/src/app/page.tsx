@@ -9,6 +9,7 @@ import ProfileSetup from "@/components/profile/ProfileSetup";
 import { useFoodScan } from "@/hooks/useFoodScan";
 import { Trophy, Settings } from "lucide-react";
 import { sanitizeApiUrl } from "@/lib/utils";
+import AdvisorMenu from "@/components/advisor/AdvisorMenu";
 
 const LiveClock = () => {
   const [time, setTime] = useState<Date | null>(null);
@@ -253,7 +254,18 @@ export default function PrimeStateApp() {
       </section>
 
       {/* Dashboard View */}
-      <section>
+      <section className="space-y-12">
+        <AdvisorMenu 
+          remainingMacros={{
+            calories: userProfile?.calorie_goal ? Math.max(0, userProfile.calorie_goal - (todayTotals?.calories || 0)) : 2000,
+            protein: userProfile?.protein_goal ? Math.max(0, userProfile.protein_goal - (todayTotals?.protein || 0)) : 160,
+            carbs: Math.max(0, (((userProfile?.calorie_goal || 2000) - ((userProfile?.protein_goal || 160) * 4) - (((userProfile?.calorie_goal || 2000) * 0.25))) / 4) - (todayTotals?.carbs || 0)),
+            fats: Math.max(0, (((userProfile?.calorie_goal || 2000) * 0.25) / 9) - (todayTotals?.fats || 0))
+          }}
+          apiBaseUrl={API_BASE}
+          authToken={TEST_TOKEN}
+        />
+
         <TrendsDashboard 
           metrics={{
             protein: todayTotals?.protein || 0,
