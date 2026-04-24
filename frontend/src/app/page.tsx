@@ -380,6 +380,7 @@ export default function PrimeStateApp() {
       <PortionScaleModal 
         isOpen={showPortionModal}
         unitName={lastAnalysis?.unit_name || "unidad"}
+        baseGrams={lastAnalysis?.analysis?.cantidad_estimada_gramos || 100}
         onConfirm={handleScaleEntry}
       />
 
