@@ -29,16 +29,17 @@ export default function DopamineRoom({ isOpen, onClose, assetUrl, message }: Dop
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-[#120000]"
+          className="fixed inset-0 z-50 overflow-y-auto bg-[#120000]"
         >
-          {/* Pulsating Inner Glow */}
-          <motion.div 
-            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-            transition={{ repeat: Infinity, duration: 4 }}
-            className="absolute inset-x-0 top-0 h-1/2 bg-brand-red/10 blur-[120px]"
-          />
+          <div className="min-h-[100dvh] flex flex-col items-center justify-center p-6 pb-24 safe-pb">
+            {/* Pulsating Inner Glow */}
+            <motion.div 
+              animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+              transition={{ repeat: Infinity, duration: 4 }}
+              className="absolute inset-x-0 top-0 h-1/2 bg-brand-red/10 blur-[120px] pointer-events-none"
+            />
 
-          <div className="relative z-10 w-full max-w-lg flex flex-col items-center gap-8">
+            <div className="relative z-10 w-full max-w-lg flex flex-col items-center gap-8">
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -97,6 +98,7 @@ export default function DopamineRoom({ isOpen, onClose, assetUrl, message }: Dop
                 Comer de todas formas (Someterse)
               </button>
             </div>
+          </div>
           </div>
         </motion.div>
       )}
