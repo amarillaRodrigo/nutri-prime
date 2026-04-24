@@ -40,6 +40,7 @@ class FoodAnalysisResult(BaseModel):
     calidad_nutricional: int = Field(ge=1, le=10)
     veredicto: str = Field(..., pattern="^(BUENO|MALO|MODERADO)$")
     justificacion: str
+    estrategia_mitigacion: Optional[str] = Field(default=None, description="Si el veredicto es MALO o MODERADO, sugerir cantidad máxima segura según la imagen.")
     food_items: List[FoodItem]
     total_estimated_calories: int
 

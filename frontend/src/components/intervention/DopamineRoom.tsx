@@ -10,9 +10,10 @@ interface DopamineRoomProps {
   onClose: (proceed: boolean) => void;
   assetUrl?: string;
   message?: string;
+  mitigationStrategy?: string;
 }
 
-export default function DopamineRoom({ isOpen, onClose, assetUrl, message }: DopamineRoomProps) {
+export default function DopamineRoom({ isOpen, onClose, assetUrl, message, mitigationStrategy }: DopamineRoomProps) {
   useEffect(() => {
     if (isOpen) {
       // Trigger Haptic Feedback (Cyber-Luxury high-friction signal)
@@ -56,6 +57,24 @@ export default function DopamineRoom({ isOpen, onClose, assetUrl, message }: Dop
                 {message || "Este alimento está saboteando tus niveles de dopamina y tus metas."}
               </p>
             </motion.div>
+
+            {/* Damage Control Protocol */}
+            {mitigationStrategy && (
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="w-full p-4 rounded-2xl bg-orange-500/10 border border-orange-500/30 text-left"
+              >
+                <div className="flex items-center gap-2 mb-2 text-orange-500">
+                  <AlertTriangle size={16} />
+                  <h3 className="font-black uppercase tracking-widest text-xs">Protocolo de Control de Daños</h3>
+                </div>
+                <p className="text-orange-200/80 font-bold text-sm leading-relaxed">
+                  {mitigationStrategy}
+                </p>
+              </motion.div>
+            )}
 
             {/* Motivational Asset (Conceptual Video Player) */}
             <motion.div

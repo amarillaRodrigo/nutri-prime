@@ -374,6 +374,7 @@ export default function PrimeStateApp() {
         }}
         assetUrl={lastAnalysis?.asset_url}
         message={lastAnalysis?.message}
+        mitigationStrategy={lastAnalysis?.analysis?.estrategia_mitigacion}
       />
 
       <PortionScaleModal 

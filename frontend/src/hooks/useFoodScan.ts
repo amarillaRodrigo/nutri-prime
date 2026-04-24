@@ -11,6 +11,8 @@ export type FoodAnalysis = {
   grasas: number;
   calidad_nutricional: number;
   total_estimated_calories: number;
+  estrategia_mitigacion?: string;
+  justificacion?: string;
 };
 
 export type ScanResponse = {
