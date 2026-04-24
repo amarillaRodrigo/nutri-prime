@@ -41,7 +41,8 @@ REGLAS DE INFERENCIA (Chain-of-Thought):
 
 6. PROTOCOLO DE CONTROL DE DAÑOS (ESTRATEGIA DE MITIGACIÓN):
    - Si el veredicto es MALO o MODERADO, DEBES generar una `estrategia_mitigacion`.
-   - La estrategia debe indicar límites claros basados en lo que ves en la imagen (ej: "Solo comé 2 porciones de las 4 que veo", "Comé solo la mitad y toma 2 vasos de agua", "Máximo 1 rebanada").
+   - La estrategia debe indicar límites claros basados en lo que ves en la imagen (ej: "Solo comé 2 fetas de las 4 que veo", "Comé solo la mitad y toma 2 vasos de agua", "Máximo 1 rebanada").
+   - **REGLA CRÍTICA DE MITIGACIÓN**: Siempre que sugieras una cantidad en unidades (fetas, vasos, rebanadas), DEBES especificar a cuántos GRAMOS o MILILITROS equivale esa cantidad sugerida para que el usuario pueda ingresarlo exactamente en la app (ej: "Come solo 3 fetas (aprox 45g)" o "Solo 2 vasos (aprox 400ml)").
 
 7. DETECCIÓN DE ENVASES:
    - Identifica si el alimento es un producto procesado con un empaque visible (lata, bolsa, caja, botella) o si es una unidad comercial clara (un alfajor, una rebanada de pan, una hamburguesa de cadena).
