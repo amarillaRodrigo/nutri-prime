@@ -14,6 +14,36 @@ from dopamine_engine import DopamineInterventionEngine
 from db_service import DBService
 from auth import get_current_user
 from models import UploadResponse, UserProfile, FoodAnalysisResult, ProfileSyncResponse, AdvisorRequest, ManualSearchResponse, ManualLogRequest, ManualSearchResult
+import random
+
+CATBOX_REWARDS = [
+    "https://files.catbox.moe/37lqle.mp4",
+    "https://files.catbox.moe/frxafy.mp4",
+    "https://files.catbox.moe/u7iiwv.mp4",
+    "https://files.catbox.moe/kut84n.mp4",
+    "https://files.catbox.moe/qrm8sw.mp4",
+    "https://files.catbox.moe/zvgpm2.mp4",
+    "https://files.catbox.moe/2ogisq.mp4",
+    "https://files.catbox.moe/05sk3z.mp4",
+    "https://files.catbox.moe/4x4s0i.mp4",
+    "https://files.catbox.moe/odcsmu.mp4",
+    "https://files.catbox.moe/08ptm3.mp4",
+    "https://files.catbox.moe/9epe2r.mp4",
+    "https://files.catbox.moe/z6hed7.mp4",
+    "https://files.catbox.moe/25z40p.mp4",
+    "https://files.catbox.moe/llsxdn.mp4",
+    "https://files.catbox.moe/qxt3y3.mp4",
+    "https://files.catbox.moe/9jo4t8.mp4",
+    "https://files.catbox.moe/5vwzo9.mp4",
+    "https://files.catbox.moe/nlirmh.mp4",
+    "https://files.catbox.moe/vtx9ew.mp4",
+    "https://files.catbox.moe/7mefq1.mp4",
+    "https://files.catbox.moe/zjuvi3.mp4",
+    "https://files.catbox.moe/ztp4e7.mp4",
+    "https://files.catbox.moe/85n27d.mp4",
+    "https://files.catbox.moe/iru7gd.mp4",
+    "https://files.catbox.moe/11ooyu.mp4"
+]
 from google import genai
 import uvicorn
 from datetime import date
@@ -166,6 +196,13 @@ async def upload_image(
         trigger_intervention = intervention_data["trigger_intervention"] or \
                                (analysis.total_estimated_calories > (calories_remaining + analysis.total_estimated_calories))
         
+        # Dopamine Reward Logic
+        reward_active = False
+        reward_url = None
+        if analysis.veredicto == "BUENO":
+            reward_active = True
+            reward_url = random.choice(CATBOX_REWARDS)
+        
         return UploadResponse(
             analysis=analysis,
             motivation_mode_active=trigger_intervention,
@@ -173,7 +210,9 @@ async def upload_image(
             message=analysis.justificacion or intervention_data["message"] or "Registro guardado.",
             entry_id=entry_id,
             is_packaged=analysis.is_packaged,
-            unit_name=analysis.unit_name
+            unit_name=analysis.unit_name,
+            reward_active=reward_active,
+            reward_url=reward_url
         )
 
     except Exception as e:
@@ -317,10 +356,19 @@ async def log_manual_food(
         today_totals = await DBService.get_today_totals(user_id)
         remaining = max(0, goal - today_totals["calories"])
         
+        # Dopamine Reward Logic
+        reward_active = False
+        reward_url = None
+        if request.veredicto == "BUENO":
+            reward_active = True
+            reward_url = random.choice(CATBOX_REWARDS)
+        
         return {
             "message": "Registro manual guardado con éxito.",
             "calories_remaining": remaining,
-            "entry_id": db_res.data[0]["id"] if db_res.data else None
+            "entry_id": db_res.data[0]["id"] if db_res.data else None,
+            "reward_active": reward_active,
+            "reward_url": reward_url
         }
         
     except Exception as e:

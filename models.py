@@ -53,6 +53,8 @@ class UploadResponse(BaseModel):
     entry_id: Optional[str] = None
     is_packaged: bool = False
     unit_name: Optional[str] = None
+    reward_active: bool = False
+    reward_url: Optional[str] = None
 
 # --- Advisor Models ---
 

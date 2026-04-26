@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import FlashCapture from "@/components/capture/FlashCapture";
 import DopamineRoom from "@/components/intervention/DopamineRoom";
+import RewardRoom from "@/components/intervention/RewardRoom";
 import TrendsDashboard from "@/components/dashboard/TrendsDashboard";
 import ProfileSetup from "@/components/profile/ProfileSetup";
 import { useFoodScan } from "@/hooks/useFoodScan";
@@ -50,6 +51,8 @@ export default function PrimeStateApp() {
   const { scanFood, isProcessing, lastAnalysis, reset, error: scanError } = useFoodScan(API_BASE);
   
   const [showDopamineRoom, setShowDopamineRoom] = useState(false);
+  const [showRewardRoom, setShowRewardRoom] = useState(false);
+  const [rewardUrl, setRewardUrl] = useState<string | undefined>(undefined);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [scanHistory, setScanHistory] = useState<any[]>([]);
@@ -223,7 +226,11 @@ export default function PrimeStateApp() {
     }
 
     if (result) {
-        if (result.motivation_mode_active) {
+        if (result.reward_active) {
+            setRewardUrl(result.reward_url);
+            setShowRewardRoom(true);
+            fetchHistory();
+        } else if (result.motivation_mode_active) {
             setShowDopamineRoom(true);
         } else if (result.is_packaged) {
             setShowPortionModal(true);
@@ -300,7 +307,13 @@ export default function PrimeStateApp() {
             <ManualSearch 
                 apiBaseUrl={API_BASE}
                 authToken={TEST_TOKEN}
-                onSuccess={() => fetchHistory()}
+                onSuccess={(data) => {
+                    if (data?.reward_active) {
+                        setRewardUrl(data.reward_url);
+                        setShowRewardRoom(true);
+                    }
+                    fetchHistory();
+                }}
             />
         </div>
       </section>
@@ -353,7 +366,19 @@ export default function PrimeStateApp() {
         initialData={userProfile}
       />
 
-      {/* Interventions */}
+      {/* Interventions & Rewards */}
+      <RewardRoom 
+        isOpen={showRewardRoom}
+        onClose={() => {
+            setShowRewardRoom(false);
+            if (lastAnalysis?.is_packaged) {
+                setShowPortionModal(true);
+            }
+        }}
+        videoUrl={rewardUrl}
+        message={lastAnalysis?.message}
+      />
+
       <DopamineRoom 
         isOpen={showDopamineRoom}
         onClose={(proceed) => {

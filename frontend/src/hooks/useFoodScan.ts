@@ -24,6 +24,8 @@ export type ScanResponse = {
   entry_id?: string;
   is_packaged?: boolean;
   unit_name?: string;
+  reward_active?: boolean;
+  reward_url?: string;
 };
 
 export function useFoodScan(apiBaseUrl: string = process.env.NEXT_PUBLIC_API_URL || "https://prime-state-api.loca.lt") {
