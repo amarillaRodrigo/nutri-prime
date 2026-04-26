@@ -109,3 +109,13 @@ class ManualLogRequest(BaseModel):
     grams: int
     veredicto: str
     justificacion: str
+
+class RefinedMacrosResult(BaseModel):
+    """Schema for Gemini output when refining macros based on context."""
+    calories: int
+    protein: float
+    carbs: float
+    fat: float
+
+class RefineContextRequest(BaseModel):
+    context: str
