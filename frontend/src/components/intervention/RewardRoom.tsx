@@ -36,6 +36,8 @@ export default function RewardRoom({ isOpen, onClose, videoUrl, message }: Rewar
       if (!isFs) {
         setIsPlaying(false);
         if (videoRef.current) {
+          videoRef.current.style.opacity = "0";
+          videoRef.current.style.pointerEvents = "none";
           videoRef.current.pause();
         }
       }
@@ -53,6 +55,10 @@ export default function RewardRoom({ isOpen, onClose, videoUrl, message }: Rewar
   const handlePlayFullscreen = () => {
     setIsPlaying(true);
     if (videoRef.current) {
+      // Synchronous style update to fix browser rendering before React cycle
+      videoRef.current.style.opacity = "1";
+      videoRef.current.style.pointerEvents = "auto";
+      
       videoRef.current.play().catch(console.error);
       const elem = videoRef.current as any;
       if (elem.requestFullscreen) {
@@ -79,10 +85,8 @@ export default function RewardRoom({ isOpen, onClose, videoUrl, message }: Rewar
             <video
               ref={videoRef}
               src={videoUrl}
-              className={cn(
-                "absolute inset-0 z-50 w-full h-full object-contain bg-black transition-opacity duration-300",
-                isPlaying ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-              )}
+              style={{ opacity: isPlaying ? 1 : 0, pointerEvents: isPlaying ? 'auto' : 'none' }}
+              className="absolute inset-0 z-50 w-full h-full object-contain bg-black transition-opacity duration-300"
               controls={isPlaying}
               playsInline
             />
