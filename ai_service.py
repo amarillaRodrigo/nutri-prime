@@ -95,3 +95,43 @@ class VisionInferenceService:
         if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg:
             raise HTTPException(status_code=429, detail="El cerebro visual está saturado por hoy. Intenta en unos minutos.")
         raise HTTPException(status_code=500, detail=f"Error en el análisis visual: {err_msg}")
+
+    async def refine_food_context(self, food_name: str, current_calories: int, current_macros: dict, context: str) -> 'RefinedMacrosResult':
+        from models import RefinedMacrosResult
+        
+        prompt = f"""
+        El usuario registró originalmente "{food_name}" asumiendo una porción estándar o la totalidad de lo visto en la imagen.
+        Se estimaron: {current_calories} calorías, Proteínas: {current_macros.get('protein', 0)}g, Carbohidratos: {current_macros.get('carbs', 0)}g, Grasas: {current_macros.get('fat', 0)}g.
+        
+        Ahora, el usuario proporciona este nuevo contexto sobre lo que REALMENTE consumió:
+        "{context}"
+        
+        Tu trabajo es recalcular las calorías y macros finales basándote en esta corrección.
+        Si dice "me comí la mitad", divide todo por 2.
+        Si dice "le saqué el pan", resta los carbohidratos correspondientes al pan, etc.
+        Si dice "me comí todo", devuelve los valores originales.
+        """
+        
+        last_err = None
+        for model_id in self.model_ids:
+            try:
+                response = await client.aio.models.generate_content(
+                    model=model_id,
+                    contents=[prompt],
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=RefinedMacrosResult,
+                    )
+                )
+                
+                if not response.text:
+                    continue
+                    
+                analysis_dict = json.loads(response.text)
+                return RefinedMacrosResult(**analysis_dict)
+                
+            except Exception as e:
+                last_err = e
+                continue
+                
+        raise HTTPException(status_code=500, detail=f"Error en el refinamiento de contexto: {str(last_err)}")

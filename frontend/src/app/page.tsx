@@ -12,6 +12,7 @@ import { Trophy, Settings } from "lucide-react";
 import { sanitizeApiUrl } from "@/lib/utils";
 import AdvisorMenu from "@/components/advisor/AdvisorMenu";
 import PortionScaleModal from "@/components/intervention/PortionScaleModal";
+import ContextRefinementModal from "@/components/intervention/ContextRefinementModal";
 import ManualSearch from "@/components/capture/ManualSearch";
 
 const LiveClock = () => {
@@ -59,6 +60,7 @@ export default function PrimeStateApp() {
   const [todayTotals, setTodayTotals] = useState<any>(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const [showPortionModal, setShowPortionModal] = useState(false);
+  const [showContextModal, setShowContextModal] = useState(false);
 
   // For testing: Hardcoded token
   const TEST_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpemtsaG5jZm1rYXpwb3BqemF3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjQ4MDE1NywiZXhwIjoyMDkyMDU2MTU3fQ._nQQ_z2NG7_Kfvrjm6D1stqLR3VTuje4KvWvd5WlK3A";
@@ -205,6 +207,24 @@ export default function PrimeStateApp() {
         fetchHistory();
     } catch (e) {
         console.error("Scaling error", e);
+    }
+  };
+
+  const handleRefineContext = async (contextText: string) => {
+    if (!lastAnalysis?.entry_id) return;
+    try {
+        await fetch(`${API_BASE}/history/${lastAnalysis.entry_id}/refine`, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${TEST_TOKEN}` 
+            },
+            body: JSON.stringify({ context: contextText })
+        });
+        setShowContextModal(false);
+        fetchHistory();
+    } catch (e) {
+        console.error("Refinement error", e);
     }
   };
 
@@ -389,17 +409,27 @@ export default function PrimeStateApp() {
                     handleDeleteEntry(lastAnalysis.entry_id);
                 }
             } else {
-                // Flow: After Dopamine, if it was packaged, show scale modal
-                if (lastAnalysis?.is_packaged) {
-                    setShowPortionModal(true);
-                } else {
-                    fetchHistory();
-                }
+                // Flow: After Dopamine, if user proceeds, offer context refinement
+                setShowContextModal(true);
             }
         }}
         assetUrl={lastAnalysis?.asset_url}
         message={lastAnalysis?.message}
         mitigationStrategy={lastAnalysis?.analysis?.estrategia_mitigacion}
+      />
+
+      <ContextRefinementModal
+        isOpen={showContextModal}
+        onConfirm={handleRefineContext}
+        onSkip={() => {
+            setShowContextModal(false);
+            // If skipped and packaged, fallback to portion scale, else history
+            if (lastAnalysis?.is_packaged) {
+                setShowPortionModal(true);
+            } else {
+                fetchHistory();
+            }
+        }}
       />
 
       <PortionScaleModal 

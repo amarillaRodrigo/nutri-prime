@@ -75,6 +75,18 @@ class DBService:
         }).eq("id", entry_id).eq("user_id", user_id).execute()
 
     @staticmethod
+    async def update_food_macros(entry_id: str, user_id: str, calories: int, protein: float, carbs: float, fat: float):
+        if not DBService._db: return None
+        return DBService._db.table("food_entries").update({
+            "calories": calories,
+            "macros": {
+                "protein": protein,
+                "carbs": carbs,
+                "fat": fat
+            }
+        }).eq("id", entry_id).eq("user_id", user_id).execute()
+
+    @staticmethod
     async def get_daily_log(user_id: str, date_str: str):
         if not DBService._db: return None
         response = DBService._db.table("daily_logs").select("*").eq("user_id", user_id).eq("date", date_str).execute()

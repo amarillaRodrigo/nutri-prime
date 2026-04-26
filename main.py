@@ -13,7 +13,7 @@ from analytics_service import AnalyticsService
 from dopamine_engine import DopamineInterventionEngine
 from db_service import DBService
 from auth import get_current_user
-from models import UploadResponse, UserProfile, FoodAnalysisResult, ProfileSyncResponse, AdvisorRequest, ManualSearchResponse, ManualLogRequest, ManualSearchResult
+from models import UploadResponse, UserProfile, FoodAnalysisResult, ProfileSyncResponse, AdvisorRequest, ManualSearchResponse, ManualLogRequest, ManualSearchResult, RefineContextRequest
 import random
 
 CATBOX_REWARDS = [
@@ -42,7 +42,174 @@ CATBOX_REWARDS = [
     "https://files.catbox.moe/ztp4e7.mp4",
     "https://files.catbox.moe/85n27d.mp4",
     "https://files.catbox.moe/iru7gd.mp4",
-    "https://files.catbox.moe/11ooyu.mp4"
+    "https://files.catbox.moe/11ooyu.mp4",
+    "https://files.catbox.moe/96iwrb.mp4",
+    "https://files.catbox.moe/xiw9t8.mp4",
+    "https://files.catbox.moe/foawne.mp4",
+    "https://files.catbox.moe/l5r3zx.mp4",
+    "https://files.catbox.moe/gmzw1x.mp4",
+    "https://files.catbox.moe/d3r5q9.mp4",
+    "https://files.catbox.moe/2nfxgg.mp4",
+    "https://files.catbox.moe/a3sqty.mp4",
+    "https://files.catbox.moe/ks8uei.mp4",
+    "https://files.catbox.moe/qe12xi.mp4",
+    "https://files.catbox.moe/aul4bp.mp4",
+    "https://files.catbox.moe/ks5ghh.mp4",
+    "https://files.catbox.moe/6e3i7w.mp4",
+    "https://files.catbox.moe/0d7mje.mp4",
+    "https://files.catbox.moe/ophtws.mp4",
+    "https://files.catbox.moe/yhhqer.mp4",
+    "https://files.catbox.moe/1uwo7l.mp4",
+    "https://files.catbox.moe/tt59td.mp4",
+    "https://files.catbox.moe/nrmkzs.mp4",
+    "https://files.catbox.moe/5zr37i.mp4",
+    "https://files.catbox.moe/mqd6y9.mp4",
+    "https://files.catbox.moe/i6p1yj.mp4",
+    "https://files.catbox.moe/624gpc.mp4",
+    "https://files.catbox.moe/2w0k21.mp4",
+    "https://files.catbox.moe/ol9y8u.mp4",
+    "https://files.catbox.moe/fz1lre.mp4",
+    "https://files.catbox.moe/r91026.mp4",
+    "https://files.catbox.moe/fou9ca.mp4",
+    "https://files.catbox.moe/a6cdju.mp4",
+    "https://files.catbox.moe/2bo15p.mp4",
+    "https://files.catbox.moe/k1eqby.mp4",
+    "https://files.catbox.moe/w3ms3i.mp4",
+    "https://files.catbox.moe/5wovwo.mp4",
+    "https://files.catbox.moe/t1o0ap.mp4",
+    "https://files.catbox.moe/v25dic.mp4",
+    "https://files.catbox.moe/l81zhf.mp4",
+    "https://files.catbox.moe/83mhiq.mp4",
+    "https://files.catbox.moe/lpmcuh.mp4",
+    "https://files.catbox.moe/d4hce8.mp4",
+    "https://files.catbox.moe/jd2m3e.mp4",
+    "https://files.catbox.moe/f0qqjk.mp4",
+    "https://files.catbox.moe/bhfa2d.mp4",
+    "https://files.catbox.moe/g0oou5.mp4",
+    "https://files.catbox.moe/4gau90.mp4",
+    "https://files.catbox.moe/ph6ggf.mp4",
+    "https://files.catbox.moe/n91dt6.mp4",
+    "https://files.catbox.moe/pxpnm9.mp4",
+    "https://files.catbox.moe/xs6084.mp4",
+    "https://files.catbox.moe/e7gky9.mp4",
+    "https://files.catbox.moe/t7kfuw.mp4",
+    "https://files.catbox.moe/8adgy1.mp4",
+    "https://files.catbox.moe/87ze97.mp4",
+    "https://files.catbox.moe/qxiew6.mp4",
+    "https://files.catbox.moe/ujl297.mp4",
+    "https://files.catbox.moe/6xzzke.mp4",
+    "https://files.catbox.moe/7gmyvn.mp4",
+    "https://files.catbox.moe/sed5s2.mp4",
+    "https://files.catbox.moe/0d1bwz.mp4",
+    "https://files.catbox.moe/17eapz.mp4",
+    "https://files.catbox.moe/nraum4.mp4",
+    "https://files.catbox.moe/lp7grx.mp4",
+    "https://files.catbox.moe/dqhcx1.mp4",
+    "https://files.catbox.moe/1hgk87.mp4",
+    "https://files.catbox.moe/u2icid.mp4",
+    "https://files.catbox.moe/vstxve.mp4",
+    "https://files.catbox.moe/pw0c6g.mp4",
+    "https://files.catbox.moe/cn2qlu.mp4",
+    "https://files.catbox.moe/nzbjjh.mp4",
+    "https://files.catbox.moe/94pilk.mp4",
+    "https://files.catbox.moe/1ah1sn.mp4",
+    "https://files.catbox.moe/8lfcaq.mp4",
+    "https://files.catbox.moe/t2wcmb.mp4",
+    "https://files.catbox.moe/0sstoa.mp4",
+    "https://files.catbox.moe/yuzr8v.mp4",
+    "https://files.catbox.moe/pnqkky.mp4",
+    "https://files.catbox.moe/zxtc2k.mp4",
+    "https://files.catbox.moe/gqw4gl.mp4",
+    "https://files.catbox.moe/byhjxe.mp4",
+    "https://files.catbox.moe/lnnun3.mp4",
+    "https://files.catbox.moe/d8twhj.mp4",
+    "https://files.catbox.moe/p7a24a.mp4",
+    "https://files.catbox.moe/g7ykxr.mp4",
+    "https://files.catbox.moe/q3q3gb.mp4",
+    "https://files.catbox.moe/ifm46q.mp4",
+    "https://files.catbox.moe/md25x9.mp4",
+    "https://files.catbox.moe/mvfh4s.mp4",
+    "https://files.catbox.moe/8fn0py.mp4",
+    "https://files.catbox.moe/tdkc44.mp4",
+    "https://files.catbox.moe/powltj.mp4",
+    "https://files.catbox.moe/hru3ei.mp4",
+    "https://files.catbox.moe/7ooaie.mp4",
+    "https://files.catbox.moe/9e230i.mp4",
+    "https://files.catbox.moe/9eni41.mp4",
+    "https://files.catbox.moe/pnlfq5.mp4",
+    "https://files.catbox.moe/o45vk3.mp4",
+    "https://files.catbox.moe/73ih5o.mp4",
+    "https://files.catbox.moe/pwbhyy.mp4",
+    "https://files.catbox.moe/hx7gwr.mp4",
+    "https://files.catbox.moe/es3mjg.mp4",
+    "https://files.catbox.moe/z080xo.mp4",
+    "https://files.catbox.moe/26d9d3.mp4",
+    "https://files.catbox.moe/urdlh3.mp4",
+    "https://files.catbox.moe/4c4u9m.mp4",
+    "https://files.catbox.moe/9muywv.mp4",
+    "https://files.catbox.moe/rxs22m.mp4",
+    "https://files.catbox.moe/xw29a0.mp4",
+    "https://files.catbox.moe/j1fvhq.mp4",
+    "https://files.catbox.moe/8ap0u1.mp4",
+    "https://files.catbox.moe/krdz9v.mp4",
+    "https://files.catbox.moe/20cr4u.mp4",
+    "https://files.catbox.moe/p2siiz.mp4",
+    "https://files.catbox.moe/has7i5.mp4",
+    "https://files.catbox.moe/gbjiym.mp4",
+    "https://files.catbox.moe/q3y8j9.mp4",
+    "https://files.catbox.moe/t13jar.mp4",
+    "https://files.catbox.moe/gxhj99.mp4",
+    "https://files.catbox.moe/7pn439.mp4",
+    "https://files.catbox.moe/47gy6t.mp4",
+    "https://files.catbox.moe/for5dx.mp4",
+    "https://files.catbox.moe/o64443.mp4",
+    "https://files.catbox.moe/wdta28.mp4",
+    "https://files.catbox.moe/18q2gm.mp4",
+    "https://files.catbox.moe/4x9ecr.mp4",
+    "https://files.catbox.moe/9hsf9t.mp4",
+    "https://files.catbox.moe/1ix237.mp4",
+    "https://files.catbox.moe/zcm3m3.mp4",
+    "https://files.catbox.moe/5scubr.mp4",
+    "https://files.catbox.moe/x3j9ya.mp4",
+    "https://files.catbox.moe/qisecv.mp4",
+    "https://files.catbox.moe/taezxb.mp4",
+    "https://files.catbox.moe/33y9i0.MP4",
+    "https://files.catbox.moe/vfb5vw.mp4",
+    "https://files.catbox.moe/mywq5r.mp4",
+    "https://files.catbox.moe/krq6sd.mp4",
+    "https://files.catbox.moe/hs4m59.mp4",
+    "https://files.catbox.moe/16iypw.mp4",
+    "https://files.catbox.moe/sg5gna.mp4",
+    "https://files.catbox.moe/74m8ox.mp4",
+    "https://files.catbox.moe/74m8ox.mp4",
+    "https://files.catbox.moe/gstyiv.mp4",
+    "https://files.catbox.moe/ky3fw6.mp4",
+    "https://files.catbox.moe/zle2pm.mp4",
+    "https://files.catbox.moe/3agd1t.mp4",
+    "https://files.catbox.moe/p3ld4j.mp4",
+    "https://files.catbox.moe/i6edkw.mp4",
+    "https://files.catbox.moe/o79z7k.mp4",
+    "https://files.catbox.moe/1a2bvu.mp4",
+    "https://files.catbox.moe/p2zluy.mp4",
+    "https://files.catbox.moe/4fwclx.mp4",
+    "https://files.catbox.moe/m6twr0.mp4",
+    "https://files.catbox.moe/cp6304.mp4",
+    "https://files.catbox.moe/umdo9h.mp4",
+    "https://files.catbox.moe/92id4t.mp4",
+    "https://files.catbox.moe/ryeg66.mp4",
+    "https://files.catbox.moe/ux6wi5.mp4",
+    "https://files.catbox.moe/n1ar3n.mp4",
+    "https://files.catbox.moe/54ram9.mp4",
+    "https://files.catbox.moe/38fwuz.mp4",
+    "https://files.catbox.moe/wjetc8.mp4",
+    "https://files.catbox.moe/1qlda1.mp4",
+    "https://files.catbox.moe/azmw3f.mp4",
+    "https://files.catbox.moe/t0xxm8.mp4",
+    "https://files.catbox.moe/f5zmp6.mp4",
+    "https://files.catbox.moe/q6x1gk.mp4",
+    "https://files.catbox.moe/fc3d28.mp4"
+
+
 ]
 from google import genai
 import uvicorn
@@ -301,6 +468,41 @@ async def scale_history_entry(
     try:
         await DBService.scale_food_entry(entry_id, user_id, request.multiplier)
         return {"message": "Entry scaled"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/history/{entry_id}/refine")
+async def refine_history_entry(
+    entry_id: str,
+    request: RefineContextRequest,
+    user_id: str = Depends(get_current_user)
+):
+    try:
+        # Get the current entry
+        db_response = DBService._db.table("food_entries").select("*").eq("id", entry_id).eq("user_id", user_id).execute()
+        if not db_response.data:
+            raise HTTPException(status_code=404, detail="Entry not found")
+            
+        entry = db_response.data[0]
+        
+        # Call AI to refine macros based on context
+        refined_data = await vision_service.refine_food_context(
+            food_name=entry.get("food_name", "Comida"),
+            current_calories=entry.get("calories", 0),
+            current_macros=entry.get("macros", {}),
+            context=request.context
+        )
+        
+        # Update entry in DB
+        await DBService.update_food_macros(
+            entry_id, user_id, 
+            refined_data.calories, 
+            refined_data.protein, 
+            refined_data.carbs, 
+            refined_data.fat
+        )
+        
+        return {"message": "Entry refined", "refined_macros": refined_data.dict()}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
