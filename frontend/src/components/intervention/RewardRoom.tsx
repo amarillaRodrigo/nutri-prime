@@ -13,6 +13,7 @@ interface RewardRoomProps {
 }
 
 export default function RewardRoom({ isOpen, onClose, videoUrl, message }: RewardRoomProps) {
+  const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -22,6 +23,7 @@ export default function RewardRoom({ isOpen, onClose, videoUrl, message }: Rewar
         navigator.vibrate([100, 50, 100]);
       }
     } else {
+      setIsPlaying(false);
       if (videoRef.current) {
         videoRef.current.pause();
       }
@@ -31,8 +33,11 @@ export default function RewardRoom({ isOpen, onClose, videoUrl, message }: Rewar
   useEffect(() => {
     const handleFullscreenChange = () => {
       const isFs = document.fullscreenElement || (document as any).webkitFullscreenElement;
-      if (!isFs && videoRef.current) {
-        videoRef.current.pause();
+      if (!isFs) {
+        setIsPlaying(false);
+        if (videoRef.current) {
+          videoRef.current.pause();
+        }
       }
     };
 
@@ -46,6 +51,7 @@ export default function RewardRoom({ isOpen, onClose, videoUrl, message }: Rewar
   }, []);
 
   const handlePlayFullscreen = () => {
+    setIsPlaying(true);
     if (videoRef.current) {
       videoRef.current.play().catch(console.error);
       const elem = videoRef.current as any;
@@ -73,8 +79,11 @@ export default function RewardRoom({ isOpen, onClose, videoUrl, message }: Rewar
             <video
               ref={videoRef}
               src={videoUrl}
-              className="absolute w-0 h-0 opacity-0 pointer-events-none"
-              controls
+              className={cn(
+                "absolute inset-0 z-50 w-full h-full object-contain bg-black transition-opacity duration-300",
+                isPlaying ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+              )}
+              controls={isPlaying}
               playsInline
             />
           )}
